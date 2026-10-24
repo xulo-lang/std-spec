@@ -1,0 +1,3 @@
+[submodule "xulo-spec"]
+	path = xulo-spec
+	url = https://github.com/xulo-lang/spec.git
