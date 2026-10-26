@@ -57,8 +57,33 @@ use std::json::{parse, stringify, valid};
 - **Nesting is bounded.** Both directions share one ceiling — 128 levels of
   arrays and objects. A document or a value nested deeper than the ceiling
   is `Err`, never a partial result and never a trap.
+- **Lists and tuples are arrays.** A `list` serializes with its order
+  intact; a positional tuple serializes as the array of its elements —
+  `(1, "x")` becomes `[1,"x"]`. `parse` reads an array as a `list`: the
+  tuple's type is not carried by the text, and the consumer rebuilds it —
+  the plain shape a struct comes back in too ([`Structs`](#structs)).
+- **Maps are objects.** A `Map<string, V>` and an object literal emit
+  their entries as members under the sorted-members rule above. Keys of
+  other types are **textified** on the way out: an `int` by its decimal
+  form, a finite `float` by the number form `stringify` prints (so `1.0`
+  keys as `1`), a `bool` as `true` or `false`. Two keys that textify to
+  the same string are `Err`; so are a non-finite `float` key and an enum
+  key — an enum has no JSON spelling here any more than it does as a
+  value. Textified keys come back as `string` keys from `parse`.
+- **Sets are arrays, in a defined order.** A `Set<T>` has no order of its
+  own — iteration over one is unspecified (the language specification) —
+  so `stringify` supplies one: the elements are emitted **sorted by their
+  compact JSON text in UTF-8 byte order**, one rule across every
+  hashable element type and the same kind of choice that sorts object
+  members (§ 5.7). The order is on the text, not the value: a set of
+  numbers orders by their digits — `10` before `2`. `parse` reads a
+  `list`; `setFromList` restores the set — its elements are distinct, so
+  the trip keeps every one.
 
 ```xulo
+std::json::stringify(setFromList(["b", "a"]))   // runs: ["a","b"] — ordered by element text
+std::json::stringify(Map<int, string>{1: "x"})  // runs: {"1":"x"} — the key textified
+std::json::stringify((1, "x"))                  // runs: [1,"x"] — the tuple's elements
 match std::json::parse("{\"b\": 2, \"a\": 1}") {
   Result::Ok(v) => match std::json::stringify(v) {
     Result::Ok(text) => print(text)          // runs: {"a":1,"b":2}
@@ -150,7 +175,11 @@ match std::json::parse("{") {
     values, foreign pointers (`Ptr`), signals, and promises. Ordinary
     objects — object literals, struct-shaped values — and lists serialize
     as JSON objects and arrays (what a struct's members are is
-    [`Structs`](#structs)'s).
+    [`Structs`](#structs)'s; the collection rules — lists, tuples, maps,
+    sets — are [`The value model`](#the-value-model)'s).
+  - **Map keys that do not textify distinctly**: two keys naming the
+    same string, a non-finite `float` key, an enum key — the key rules of
+    [`The value model`](#the-value-model).
   - **Cycles** — a list or object that contains itself. A cycle is caught
     by the depth ceiling and arrives as `Err` (a depth message naming the
     ceiling), never as a trap or a hang.
@@ -261,7 +290,12 @@ std::json::valid("")               // runs: false — an empty document
 
 - For every value JSON can represent whose numbers fit within ±2⁵³,
   `parse(stringify(v))` reproduces `v`, and the text is stable after one
-  trip: `stringify(parse(stringify(v)))` equals `stringify(v)`.
+  trip: `stringify(parse(stringify(v)))` equals `stringify(v)`. Nominal
+  types are the one exception to the first half: a struct, a tuple, or a
+  set comes back as its plain shape — object, list, list — and a map with
+  textified keys comes back with `string` keys; the constructor or
+  `setFromList` restores the type ([`Structs`](#structs)). The **text**
+  still stabilizes in every case.
 - **Indentation is not part of the round trip.** `parse` does not see it,
   and `stringify` with `indent` omitted always returns the compact text —
   `parse(stringify(v, 2))` reproduces `v` exactly as `parse(stringify(v))`
