@@ -76,7 +76,7 @@ returns no value at all.
 | `readLine` | `fn(): Result<string?, Error>` | `std::io` |
 | `readN` | `fn(max: number): Result<string?, Error>` | `std::io` |
 | `RegexError` | type `{ message: string }`; constructed only by `RegExp::compile`'s `Err` | `std::regex` |
-| `RegexMatch` | type `{ value: string }` with `fn group(index: number): string?` | `std::regex` |
+| `RegexMatch` | type `{ value: string, index: int, end: int }` with `fn group(ref: number \| string): string?` | `std::regex` |
 | `RegExp` | type; static `fn compile(pattern: string, flags: string?): Result<RegExp, RegexError>`; methods `fn test(input: string): bool`, `fn find(input: string): RegexMatch?`, `fn find_all(input: string): List<RegexMatch>` | `std::regex` |
 | `remove` | `fn(path: string): Result<unit, Error>` | `std::fs` |
 | `removeDir` | `fn(path: string): Result<unit, Error>` | `std::fs` |
@@ -101,6 +101,7 @@ returns no value at all.
 | `stdinIsTTY` | `fn(): bool` | `std::io` |
 | `stdoutIsTTY` | `fn(): bool` | `std::io` |
 | `string.replace` | `fn(pattern: RegExp, replacer: string \| fn(RegexMatch): string): string` | `std::regex` |
+| `string.split` | `fn(re: RegExp): List<string>` | `std::regex` |
 | `stringify` | `fn(value: any, indent: number? = null): Result<string, Error>` | `std::json` |
 | `tan` | `fn(x: float): float` | `std::math` |
 | `TAU` | `float` (constant) | `std::math` |

@@ -27,7 +27,7 @@ common. Each member's meaning is specified in its own module chapter.
 | `std::net` | TCP sockets over opaque numeric handles | [`net.md`](net.md) |
 | `std::process` | exit status; argv; child capture | [`process.md`](process.md) |
 | `std::json` | parse, stringify, and validate the JSON value model | [`json.md`](json.md) |
-| `std::regex` | `RegExp`, `RegexMatch`, and substitution | [`regex.md`](regex.md) |
+| `std::regex` | `RegExp`, `RegexMatch`, substitution, and splitting | [`regex.md`](regex.md) |
 
 ## 2. Reaching the standard library
 
@@ -262,7 +262,7 @@ data, not failure, and a member never reports it as `Err`:
 | Absence | Member |
 |---------|--------|
 | end of input | `std::io::readLine()` → `null`; `std::io::readN(max)` → `null` |
-| no match | `std::regex::RegExp.find` → `null` |
+| no match | `std::regex::RegExp.find` → `null`; `RegexMatch.group` → `null` for group 0, out of range, a non-participating group, or an unknown name |
 | variable not set | `std::os::getenv` → `Ok(null)` (set but the operation failed → `Err`) |
 
 ### 5.3 Total, fallible, and runtime failure

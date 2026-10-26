@@ -94,9 +94,10 @@ language specification governs everything in § 1.1's first row.
    every type and admits every member access — distinct from the language's
    top type `unknown`, which admits nothing without narrowing. The language
    specification does not yet name `any`; adopting it is a language change.
-3. **`string.replace`.** The substitution method on `string` that takes a
-   `RegExp` is specified in [`modules/regex.md`](modules/regex.md); the
-   language specification's string section does not yet mention it.
+3. **`string.replace` and `string.split`.** The substitution and splitting
+   methods on `string` that take a `RegExp` are specified in
+   [`modules/regex.md`](modules/regex.md); the language specification's
+   string section does not yet mention them.
 4. **A never-returning call in statement position.** `std::process::exit(1)`
    is an ordinary expression statement; the language's `E0218` row admits
    only excepted control-flow constructs and discarded `send` tasks, so that
@@ -188,7 +189,7 @@ Additional conventions:
 | [`modules/net.md`](modules/net.md) | `std::net` — TCP sockets over opaque numeric handles |
 | [`modules/process.md`](modules/process.md) | `std::process` — exit status, argv, child capture |
 | [`modules/json.md`](modules/json.md) | `std::json` — parse, stringify, and validate the JSON value model |
-| [`modules/regex.md`](modules/regex.md) | `std::regex` — `RegExp`, `RegexMatch`, and substitution |
+| [`modules/regex.md`](modules/regex.md) | `std::regex` — `RegExp`, `RegexMatch`, substitution, and splitting |
 | [`signature-index.md`](signature-index.md) | Every member in one alphabetical index |
 | [`changes/`](changes/README.md) | Incremental change proposals (OpenSpec style) |
 
@@ -241,7 +242,7 @@ language spec        normative for the language around std
 | `JSONError` enum, `JSON::parse<T>`, `parse_async` | failures are `Result<_, Error>`; there is no `JSONError` and no `parse_async` |
 | clocks return `u64`, `Time::now_nanos` casing | `u64`, lowerCamelCase `nowNanos` (agrees on type, differs on namespace) |
 | `File`, `fetch`, `HashMap`, `Random`, … | roadmap candidates only (§ 1.2) |
-| `string.replace` availability unstated | specified in [`modules/regex.md`](modules/regex.md) |
+| `string.replace` / `string.split` availability unstated | specified in [`modules/regex.md`](modules/regex.md) |
 
 ## 7. Contributing
 
