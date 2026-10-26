@@ -1,12 +1,13 @@
 # `std::path`
 
 `std::path` holds pure string operations on `/`-separated paths: joining,
-taking the parent, the final component, and the extension, and normalizing
-away redundancy. Every member is total — `""`, all slashes, and a lone `..`
-each have a defined answer — so the module has no `Result`, no absence, and
-no runtime failure. It is the portable companion to [`std::fs`](fs.md): it
-applies POSIX rules on every host, while `fs` follows the host's conventions
-([`README.md`](README.md) § 5.5).
+testing for an absolute path, taking the parent, the final component, its
+stem and extension, splitting those apart, replacing an extension, and
+normalizing away redundancy. Every member is total — `""`, all slashes, and
+a lone `..` each have a defined answer — so the module has no `Result`, no
+absence, and no runtime failure. It is the portable companion to
+[`std::fs`](fs.md): it applies POSIX rules on every host, while `fs` follows
+the host's conventions ([`README.md`](README.md) § 5.5).
 
 The qualified path needs no import:
 
@@ -18,7 +19,7 @@ print(std::path::basename("/etc/hosts"))  // runs: hosts
 Import forms are the six of [`README.md`](README.md) § 2.2:
 
 ```xulo
-use std::path::*;               // join, dirname, basename, ext, normalize
+use std::path::*;               // every function of the face
 use std::path as p;
 p::normalize("a//b/./c/")       // ok: "a/b/c"
 use std::path::{join, ext};
@@ -42,6 +43,24 @@ bind the whole module:
   [`README.md`](README.md) § 5.7 requires. A program that must be
   host-independent builds its paths here and hands them to `fs` (see
   *Relationship to `std::fs`* below).
+
+## Absolute
+
+| Member | Signature | Meaning |
+|--------|-----------|---------|
+| `std::path::isAbsolute` | `fn(path: string): bool` | whether `path` names an absolute location |
+
+- The test is the first character alone: a leading `/` — the one separator
+  this module recognizes — makes the path absolute, and nothing else can:
+  `"a/b"`, `""`, `".."`, and a host-style `"C:\\x"` are all relative.
+- It never consults the host: absolute here means "written with a root" in
+  POSIX syntax, not "exists" or "resolves" (Domain's third rule).
+
+```xulo
+print(std::path::isAbsolute("/etc/hosts"))   // runs: true
+print(std::path::isAbsolute("etc/hosts"))    // runs: false
+let bare = std::path::isAbsolute("")         // ok: false
+```
 
 ## Joining
 
@@ -73,13 +92,20 @@ let empty = std::path::join("", "")           // ok: ""
 |--------|-----------|---------|
 | `std::path::dirname` | `fn(path: string): string` | everything before the last `/`, trailing slashes ignored |
 | `std::path::basename` | `fn(path: string): string` | the final component, trailing slashes ignored |
+| `std::path::split` | `fn(path: string): { dir: string, base: string, ext: string }` | `dirname`, `basename`, and `ext` of `path` in one record |
 
-- Both members trim trailing slashes first and then look for the last `/`.
+- All members here trim trailing slashes first and then look for the
+  last `/`.
 - `dirname` yields `""` when the path names no parent — `"a"` and `""` —
   and `"/"` both for a name directly under the root (`"/a"`) and for the
   root itself (`"/"`, `"///"`).
 - `basename` yields `""` when the path names no component: `""`, `"/"`,
   and `"///"`.
+- The three fields of `split` are exactly the three members' answers for
+  the same input — `dir` is `dirname`'s, `base` is `basename`'s, `ext` is
+  the `ext` member's below — one call and one binding instead of three.
+  Edge inputs follow the three: `split("/")` is `{ dir: "/", base: "",
+  ext: "" }`, and `split("a")` is `{ dir: "", base: "a", ext: "" }`.
 
 ```xulo
 print(std::path::dirname("/a/b/c.txt"))   // runs: /a/b
@@ -90,6 +116,8 @@ let root = std::path::dirname("/")        // ok: "/" — the root is its own par
 print(std::path::basename("/a/b/"))       // runs: b
 print(std::path::basename("file"))        // runs: file
 let bare = std::path::basename("/")       // ok: "" — no component is named
+let s = std::path::split("/var/log/app.log")
+print(`${s.dir} ${s.base} ${s.ext}`)      // runs: /var/log app.log .log
 ```
 
 ## Extension
@@ -97,6 +125,8 @@ let bare = std::path::basename("/")       // ok: "" — no component is named
 | Member | Signature | Meaning |
 |--------|-----------|---------|
 | `std::path::ext` | `fn(path: string): string` | the extension of the final component, including the dot |
+| `std::path::stem` | `fn(path: string): string` | the final component without its extension |
+| `std::path::withExt` | `fn(path: string, ext: string): string` | `path` with the final component's extension replaced |
 
 - The result **includes the dot**: `"a.txt"` yields `".txt"`, and only the
   last dot counts, so `"a.tar.gz"` yields `".gz"`.
@@ -106,6 +136,21 @@ let bare = std::path::basename("/")       // ok: "" — no component is named
 - The extension is taken from the basename, so a dot in a directory
   component never counts (`"dir.d/f"` → `""`); trailing slashes are already
   gone by then, so `"dir.d/"` yields `".d"`.
+- `stem` is `basename` minus exactly what `ext` reports:
+  `"archive.tar.gz"` → `"archive.tar"`, `"file"` → `"file"`, and — a
+  leading dot being a marker, not an extension — `".bashrc"` →
+  `".bashrc"`. When `ext` is `""` nothing is removed, so `"file."` →
+  `"file."`.
+- `withExt` replaces that extension: the argument takes **one optional
+  leading dot** — `".md"` and `"md"` name the same extension — and the new
+  final component is the `stem` plus the extension (the `stem` alone when
+  the extension argument is empty, which is how an extension is removed:
+  `withExt("report.txt", "")` → `"report"`). A name with no extension
+  gains one (`"notes"` → `"notes.md"`), hidden files included
+  (`".bashrc"` → `".bashrc.md"`). Only the final component changes: the
+  parent directories are untouched, no other normalization happens, and
+  trailing slashes follow the module rule (`withExt("dir.d/", ".txt")` →
+  `"dir.txt"`).
 
 ```xulo
 print(std::path::ext("report.pdf"))        // runs: .pdf
@@ -114,6 +159,12 @@ let hidden = std::path::ext(".bashrc")     // ok: ""
 let trailing = std::path::ext("file.")     // ok: ""
 let dirDot = std::path::ext("dir.d/f")     // ok: ""
 print(std::path::ext("dir.d/"))            // runs: .d
+print(std::path::stem("archive.tar.gz"))   // runs: archive.tar
+let hiddenStem = std::path::stem(".bashrc")   // ok: .bashrc
+print(std::path::withExt("report.txt", ".md"))   // runs: report.md
+print(std::path::withExt("report.txt", "md"))    // runs: report.md — the dot is optional
+print(std::path::withExt("report.txt", ""))      // runs: report — the extension is removed
+let added = std::path::withExt("notes", ".md")   // ok: notes.md
 ```
 
 ## Normalization
@@ -157,7 +208,7 @@ predict what `fs` will do on another
 No `std::path` member returns `Result` or `null`, touches the filesystem, or
 stops the program on the program's own inputs: every degenerate argument —
 `""`, an all-slash path, a lone `..`, an absolute right operand to `join` —
-has a defined string answer. The five results are fixed for every input and
+has a defined string answer. The nine results are fixed for every input and
 identical on every host
 ([`README.md`](README.md) § 5.7).
 
@@ -165,7 +216,7 @@ identical on every host
 
 | Kind | Members |
 |------|---------|
-| Total | every member — `join`, `dirname`, `basename`, `ext`, `normalize` |
+| Total | every member — `isAbsolute`, `join`, `dirname`, `basename`, `split`, `ext`, `stem`, `withExt`, `normalize` |
 | Runtime failure | none |
 | Fallible (`Result`) | none |
 | Absence (`null`) | none |
@@ -176,6 +227,7 @@ identical on every host
 std::path::join("a", "b")                 // ok
 std::path::join("a")                      // error[E0207]: expected 2 arguments, found 1
 std::path::join("a", 1)                   // error[E0202]: expected `string`, found `int`
-std::path::split("a")                     // error[E0601]: no member `split`
+std::path::withExt("a")                   // error[E0207]: expected 2 arguments, found 1
+std::path::stem(1)                        // error[E0202]: expected `string`, found `int`
 Path::join("a", "b")                      // error[E0607]: `Path` lives under `std`: use `std::path::join`
 ```

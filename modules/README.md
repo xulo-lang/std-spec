@@ -146,7 +146,7 @@ of names its glob binds — coincides with the exports for nine modules, and
 | `std::time` | — | `now` `nowNanos` `monotonic` `monotonicNanos` `sleep` `format` `parse` `parts` `fromParts` `weekday` | — |
 | `std::io` | — | `print` `println` `eprint` `eprintln` `flush` `readLine` `read` `readN` `stdinIsTTY` `stdoutIsTTY` | — |
 | `std::fs` | — | `read` `write` `append` `createNew` `touch` `setTimes` `exists` `stat` `copy` `rename` `remove` `mkdir` `readDir` `walk` `removeDir` `tempFile` `tempDir` | — |
-| `std::path` | — | `join` `dirname` `basename` `ext` `normalize` | — |
+| `std::path` | — | `isAbsolute` `join` `dirname` `basename` `split` `ext` `stem` `withExt` `normalize` | — |
 | `std::os` | — | `getenv` `setenv` `cwd` `chdir` `pid` `platform` `arch` | — |
 | `std::net` | — | `tcp_listen` `tcp_accept` `tcp_connect` `sock_read` `sock_write` `sock_shutdown` `sock_close` `sock_local_addr` `sock_peer_addr` | — |
 | `std::process` | — | `exit` `args` `run` | — |

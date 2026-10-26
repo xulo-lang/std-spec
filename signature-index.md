@@ -48,6 +48,7 @@ returns no value at all.
 | `getenv` | `fn(name: string): Result<string?, Error>` | `std::os` |
 | `hypot` | `fn(a: float, b: float): float` | `std::math` |
 | `INFINITY` | `float` (constant) | `std::math` |
+| `isAbsolute` | `fn(path: string): bool` | `std::path` |
 | `join` | `fn(a: string, b: string): string` | `std::path` |
 | `log` | `fn(x: float): float` | `std::math` |
 | `log10` | `fn(x: float): float` | `std::math` |
@@ -100,10 +101,12 @@ returns no value at all.
 | `sock_read` | `fn(handle: number, max: number): Result<string?, Error>` | `std::net` |
 | `sock_shutdown` | `fn(handle: number): Result<unit, Error>` | `std::net` |
 | `sock_write` | `fn(handle: number, data: string): Result<number, Error>` | `std::net` |
+| `split` | `fn(path: string): { dir: string, base: string, ext: string }` | `std::path` |
 | `sqrt` | `fn(x: float): float` | `std::math` |
 | `stat` | `fn(path: string): Result<{ kind: string, size: number, modified: u64 }, Error>` | `std::fs` |
 | `stdinIsTTY` | `fn(): bool` | `std::io` |
 | `stdoutIsTTY` | `fn(): bool` | `std::io` |
+| `stem` | `fn(path: string): string` | `std::path` |
 | `string.replace` | `fn(pattern: RegExp, replacer: string \| fn(RegexMatch): string): string` | `std::regex` |
 | `string.split` | `fn(re: RegExp): List<string>` | `std::regex` |
 | `stringify` | `fn(value: any, indent: number? = null): Result<string, Error>` | `std::json` |
@@ -120,6 +123,7 @@ returns no value at all.
 | `valid` | `fn(text: string): bool` | `std::json` |
 | `walk` | `fn(path: string): Result<List<string>, Error>` | `std::fs` |
 | `weekday` | `fn(ms: u64): int` | `std::time` |
+| `withExt` | `fn(path: string, ext: string): string` | `std::path` |
 | `wrappingAdd` | `fn(a: int, b: int): int` | `std::math` |
 | `wrappingMul` | `fn(a: int, b: int): int` | `std::math` |
 | `wrappingSub` | `fn(a: int, b: int): int` | `std::math` |
