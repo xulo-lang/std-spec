@@ -179,7 +179,7 @@ Additional conventions:
 | [`modules/README.md`](modules/README.md) | The `std` root: inventory, reachability, module faces, shared conventions, well-formedness table |
 | [`modules/math.md`](modules/math.md) | `std::math` — constants, float and integer functions, `random` |
 | [`modules/time.md`](modules/time.md) | `std::time` — wall and monotonic clocks, sleep |
-| [`modules/io.md`](modules/io.md) | `std::io` — the process streams: writes, flush, reads |
+| [`modules/io.md`](modules/io.md) | `std::io` — the process streams: writes, flush, reads, terminal probes |
 | [`modules/fs.md`](modules/fs.md) | `std::fs` — whole-file read/write/append, timestamps, exclusive creation, inspection, copy/rename, existence, removal, directories, tree walk, temporaries |
 | [`modules/path.md`](modules/path.md) | `std::path` — portable POSIX path string operations |
 | [`modules/os.md`](modules/os.md) | `std::os` — environment, working directory, process identity |

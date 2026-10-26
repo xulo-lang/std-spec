@@ -69,6 +69,7 @@ returns no value at all.
 | `read` | `fn(): Result<string, Error>` | `std::io` |
 | `readDir` | `fn(path: string): Result<List<string>, Error>` | `std::fs` |
 | `readLine` | `fn(): Result<string?, Error>` | `std::io` |
+| `readN` | `fn(max: number): Result<string?, Error>` | `std::io` |
 | `RegexError` | type `{ message: string }`; constructed only by `RegExp::compile`'s `Err` | `std::regex` |
 | `RegexMatch` | type `{ value: string }` with `fn group(index: number): string?` | `std::regex` |
 | `RegExp` | type; static `fn compile(pattern: string, flags: string?): Result<RegExp, RegexError>`; methods `fn test(input: string): bool`, `fn find(input: string): RegexMatch?`, `fn find_all(input: string): List<RegexMatch>` | `std::regex` |
@@ -91,6 +92,8 @@ returns no value at all.
 | `sock_write` | `fn(handle: number, data: string): Result<number, Error>` | `std::net` |
 | `sqrt` | `fn(x: float): float` | `std::math` |
 | `stat` | `fn(path: string): Result<{ kind: string, size: number, modified: u64 }, Error>` | `std::fs` |
+| `stdinIsTTY` | `fn(): bool` | `std::io` |
+| `stdoutIsTTY` | `fn(): bool` | `std::io` |
 | `string.replace` | `fn(pattern: RegExp, replacer: string \| fn(RegexMatch): string): string` | `std::regex` |
 | `stringify` | `fn(value: any): Result<string, Error>` | `std::json` |
 | `tan` | `fn(x: float): float` | `std::math` |

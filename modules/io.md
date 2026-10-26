@@ -2,11 +2,12 @@
 
 `std::io` holds the process's standard streams — stdout, stderr, and stdin —
 as the real, running operations a program talks to: every write flushes
-before it returns, and the two reads drain stdin. Every member is fallible:
-each returns a `Result`, and a closed or broken stream arrives in the `Err`
-slot as data, never as a panic ([`README.md`](README.md) § 5.1). The module
-is host-dependent ([`README.md`](README.md) § 5.5): which bytes the streams
-carry is the process environment's affair.
+before it returns, and the reads drain stdin. Every member but the two
+probes is fallible: it returns a `Result`, and a closed or broken stream
+arrives in the `Err` slot as data, never as a panic
+([`README.md`](README.md) § 5.1). The two terminal probes are total. The
+module is host-dependent ([`README.md`](README.md) § 5.5): which bytes the
+streams carry is the process environment's affair.
 
 The qualified path needs no import:
 
@@ -17,8 +18,9 @@ std::io::eprintln("io: hello stderr")  // ok: the same write, on stderr
 ```
 
 Import forms are the six of [`README.md`](README.md) § 2.2, with this
-module's one deviation: the face is five of the seven exported names —
-`eprint` `eprintln` `flush` `readLine` `read` — and `print`/`println` are
+module's one deviation: the face is eight of the ten exported names —
+`eprint` `eprintln` `flush` `readLine` `read` `readN` `stdinIsTTY`
+`stdoutIsTTY` — and `print`/`println` are
 withheld from `use` because their local names are prelude intrinsics
 (`E0601`). The rule and its reason live in [`README.md`](README.md) § 3
 (with § 2.3's rejection table); what matters here is that the two members
@@ -27,7 +29,7 @@ behind it are the same flushing writes:
 ```xulo
 use std::io as io;
 io::print("prompt: ")            // ok: exactly std::io::print — flushed before it returns
-use std::io::*;                  // binds the face: eprint eprintln flush readLine read
+use std::io::*;                  // binds the face: eprint eprintln flush readLine read readN stdinIsTTY stdoutIsTTY
 // `use std::io::print;` and `use std::io as print;` are error[E0601]
 ```
 
@@ -83,6 +85,34 @@ match std::io::flush() {
   }
 }
 // runs: nothing on success; on a failed flush, the reason on stderr
+```
+
+## Terminal probes
+
+| Member | Signature | Meaning |
+|--------|-----------|---------|
+| `std::io::stdinIsTTY` | `fn(): bool` | whether stdin is connected to a terminal |
+| `std::io::stdoutIsTTY` | `fn(): bool` | whether stdout is connected to a terminal |
+
+- Both probes are **total**: a `bool` for every call — never a `Result`,
+  never `null`. A stream either is a terminal or is not, and the question is
+  always answerable.
+- `stdoutIsTTY` is the color guard: a program that writes escape sequences
+  checks it first and writes plain text when the answer is `false`, so output
+  piped to a file or another program stays clean.
+- `stdinIsTTY` is the interactivity guard: when it is `false`, input comes
+  from a pipe or a redirect, and a program prompts only when the answer is
+  `true`.
+- Stderr is deliberately not probed: no member of this module turns a write
+  on or off by destination — the four writes are unconditional — and the
+  diagnostic stream is written either way.
+
+```xulo
+if std::io::stdoutIsTTY() {
+  std::io::println("colored")     // a terminal: escapes are welcome
+} else {
+  std::io::println("plain")       // piped: keep the bytes clean
+}
 ```
 
 ## Line reading
@@ -148,14 +178,53 @@ while !done {
 std::io::read()         // runs: Ok("") — no absence; contrast readLine's Ok(null)
 ```
 
+## Bounded reading
+
+| Member | Signature | Meaning |
+|--------|-----------|---------|
+| `std::io::readN` | `fn(max: number): Result<string?, Error>` | up to `max` bytes of stdin, decoded as UTF-8; `Ok(null)` at end of input |
+
+- `max` is a byte count in **`1 …= 16777216`** (16 MiB) — the same domain
+  [`net.md`](net.md)'s `sock_read` names — and a fractional value counts as
+  its truncation toward zero. A value outside that domain is `Err`, checked
+  before the call blocks, so a bad `max` is reported whatever stdin holds.
+  The domain is an `Err`, never a runtime failure.
+- The call **blocks** until at least one byte arrives or input ends
+  (blocking member, [`README.md`](README.md) § 5.6) and yields **up to**
+  `max` bytes of what arrived: a short success is ordinary, and the next
+  `readN` continues the stream where this one stopped. The read stops at a
+  **character boundary** — an incomplete UTF-8 sequence at the cut stays in
+  the stream for the next call, never split and never decoded.
+- Decoding is strict, as in `readLine` and `read`: bytes that are not valid
+  UTF-8 are an `Err`, the `message` naming the byte offset (informative,
+  [`../README.md`](../README.md) § 3.5) — never a replacement character.
+  [`net.md`](net.md)'s `sock_read` decodes lossily because a socket carries
+  arbitrary bytes; stdin is text, as this module's other two readers
+  already assume.
+- End of input is **absence**: `Ok(null)`, the same shape as `readLine`.
+  EOF sticks: every later `readN` keeps yielding `Ok(null)`.
+- `read` and `readN` divide the same job: `read` takes all the rest in one
+  string, `readN` takes it in pieces when the whole would be too much to
+  hold. The loop on absence is the one under
+  [`readLine`](#line-reading), with `chunk` in place of `line`.
+
+```xulo
+match std::io::readN(4096) {
+  Result::Ok(null) => null             // end of input
+  Result::Ok(chunk) => std::io::println(chunk)
+  Result::Err(e) => std::io::eprintln(e.message)
+}
+std::io::readN(0)    // runs: Err — outside 1 …= 16777216, before any block
+```
+
 ## Failure model
 
 | Kind | Members |
 |------|---------|
-| Fallible (`Result`) | every member — `print` `println` `eprint` `eprintln` `flush` `readLine` `read` |
-| Absence (`Ok(null)`) | `readLine` at end of input |
-| Total | none |
-| Runtime failure | none — this module states no argument domain that stops the program |
+| Fallible (`Result`) | every member but the probes — `print` `println` `eprint` `eprintln` `flush` `readLine` `read` `readN` |
+| Absence (`Ok(null)`) | `readLine` and `readN` at end of input |
+| Total | `stdinIsTTY` `stdoutIsTTY` |
+| Runtime failure | none — this module states no argument domain that stops the program (`readN`'s `max` domain is an `Err`, not a runtime failure) |
 
 ## Checked call examples
 
@@ -165,6 +234,9 @@ use std::io as io;
 io::println("y")                       // ok: the same member, aliased
 std::io::print(42)                     // error[E0202]: expected `string`, found `int` — an int literal does not coerce to string outside interpolation
 std::io::flush(1)                      // error[E0207]: expected 0 arguments, found 1
+std::io::stdoutIsTTY()                 // ok: an ordinary bool — no Result
+std::io::readN(4096)                   // ok: Result<string?, Error>
+std::io::readN("4096")                 // error[E0202]: expected `number`, found `string`
 use std::io as print;                  // error[E0601]: prelude intrinsic name — README.md § 2.3
 std::io::writelines(["a", "b"])        // error[E0601]: no member `writelines`
 ```

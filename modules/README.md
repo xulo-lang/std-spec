@@ -20,7 +20,7 @@ common. Each member's meaning is specified in its own module chapter.
 |--------|----------------|---------|
 | `std::math` | mathematical constants; float and integer functions; `random` | [`math.md`](math.md) |
 | `std::time` | wall and monotonic clocks; sleep | [`time.md`](time.md) |
-| `std::io` | the process streams: writes, flush, line and stream reads | [`io.md`](io.md) |
+| `std::io` | the process streams: writes, flush, reads, terminal probes | [`io.md`](io.md) |
 | `std::fs` | whole-file read/write/append; timestamps; exclusive creation; inspection; copy and rename; existence; removal; directories and tree walk; temporaries | [`fs.md`](fs.md) |
 | `std::path` | portable POSIX path string operations | [`path.md`](path.md) |
 | `std::os` | environment; working directory; process identity | [`os.md`](os.md) |
@@ -138,13 +138,13 @@ nothing else.
 
 The table lists each module's **exported** members; the **face** — the set
 of names its glob binds — coincides with the exports for nine modules, and
-`std::io` withholds two of its seven (see the note below).
+`std::io` withholds two of its ten (see the note below).
 
 | Module | Constants | Functions | Types |
 |--------|-----------|-----------|-------|
 | `std::math` | `PI` `E` `TAU` `INFINITY` `NAN` | `abs` `min` `max` `sqrt` `cbrt` `pow` `floor` `ceil` `round` `trunc` `toFixed` `sin` `cos` `tan` `asin` `acos` `atan` `atan2` `log` `log2` `log10` `exp` `random` `wrappingAdd` `wrappingSub` `wrappingMul` `popCount` `countLeadingZeros` `countTrailingZeros` `rotateLeft` `rotateRight` | — |
 | `std::time` | — | `now` `nowNanos` `monotonic` `monotonicNanos` `sleep` | — |
-| `std::io` | — | `print` `println` `eprint` `eprintln` `flush` `readLine` `read` | — |
+| `std::io` | — | `print` `println` `eprint` `eprintln` `flush` `readLine` `read` `readN` `stdinIsTTY` `stdoutIsTTY` | — |
 | `std::fs` | — | `read` `write` `append` `createNew` `touch` `setTimes` `exists` `stat` `copy` `rename` `remove` `mkdir` `readDir` `walk` `removeDir` `tempFile` `tempDir` | — |
 | `std::path` | — | `join` `dirname` `basename` `ext` `normalize` | — |
 | `std::os` | — | `getenv` `setenv` `cwd` `chdir` `pid` `platform` `arch` | — |
@@ -153,7 +153,7 @@ of names its glob binds — coincides with the exports for nine modules, and
 | `std::json` | — | `parse` `stringify` | — |
 | `std::regex` | — | — | `RegExp` `RegexError` `RegexMatch` |
 
-**`std::io` exports seven functions and withholds two from its face.**
+**`std::io` exports ten functions and withholds two from its face.**
 `print` and `println` are members — `std::io::print(…)` is a checked, typed
 call to the flushing stream write ([`io.md`](io.md)) — but they are withheld
 from the glob face and from single/group `use`, because their local names are
@@ -164,7 +164,7 @@ path or a namespace alias:
 std::io::print("io: ")           // ok: the flushing write
 use std::io as io;
 io::println("hello stdout")       // ok: same member, aliased
-use std::io::*;                   // ok: eprint eprintln flush readLine read
+use std::io::*;                   // ok: eprint eprintln flush readLine read readN stdinIsTTY stdoutIsTTY
 // print("hi") after the glob is the prelude intrinsic — different buffering
 // (see io.md), and `use std::io::print;` is error[E0601]
 ```
@@ -261,7 +261,7 @@ data, not failure, and a member never reports it as `Err`:
 
 | Absence | Member |
 |---------|--------|
-| end of input | `std::io::readLine()` → `null` |
+| end of input | `std::io::readLine()` → `null`; `std::io::readN(max)` → `null` |
 | no match | `std::regex::RegExp.find` → `null` |
 | variable not set | `std::os::getenv` → `Ok(null)` (set but the operation failed → `Err`) |
 
@@ -301,7 +301,7 @@ chapter says so where it matters.
 
 Every member of version 0.1 is synchronous: the call returns when the host
 operation completes. The members that can wait on the outside world for an
-unbounded time — the `std::io` readers (`readLine`, `read`), the `std::net`
+unbounded time — the `std::io` readers (`readLine`, `read`, `readN`), the `std::net`
 openers and reads/writes, and `std::process::run` — are the **blocking
 members** named in the terminology table; while one waits, the caller does
 not make progress. Asynchronous
