@@ -40,7 +40,7 @@ The following are deliberately **not** specified here:
 |----------|------------------------|
 | The language itself: the prelude types and operations, `Result`/`Error`/`Task`, the intrinsics `print`, `println`, `str`, `assert`, the `Task` namespace, name resolution, typing, diagnostics | [Xulo language specification](https://github.com/xulo-lang/spec) |
 | The prelude namespace spellings `Math::` and `Time::` — being folded into `std::math`/`std::time` by a language change (see § 1.3) | language specification, `spec/builtins/intrinsic-functions.md` (pending change) |
-| Library modules not among the ten — the blueprint inventory of the website (collections, async, sync, thread, HTTP, `Random`, `Instant`, `DateTime`, …) | § 1.2 Roadmap |
+| Library modules not among the ten — the blueprint inventory of the website (collections, async, sync, thread, HTTP, `Random`, `Instant`, `DateTime`, …) and the `std::io` generic direction | § 1.2 Roadmap |
 | Tutorials, guides, and narrative reference prose | [xulo-website](https://xulo.org) |
 | The implementation: the `xulo-std` crate, the checker's registered tables, the CLI, the compiled back ends | implementation repository (`xulo`) |
 | Package registry protocol, manifest format, tooling | xulo-website ecosystem documentation |
@@ -54,17 +54,19 @@ boundary of `ffi.md` in the language specification.
 
 ### 1.2 Roadmap
 
-The modules below are named by the xulo-website blueprint and are **candidates
-for future changes, not part of version 0.1**. Each enters this specification
-through the workflow in [`changes/`](changes/README.md) when — and only when —
-it is being implemented:
+The modules below are **candidates for future changes, not part of version
+0.1** — most named by the xulo-website blueprint, one recording a design
+direction. Each enters this specification through the workflow in
+[`changes/`](changes/README.md) when — and only when — it is being
+implemented:
 
-| Candidate | Blueprint source | Status |
-|-----------|------------------|--------|
+| Candidate | Source | Status |
+|-----------|--------|--------|
 | `std::collections` — `HashMap`, `BTreeMap`, `HashSet`, `Deque` | website `standard-library-net-fs` | not specified |
 | `std::async` / `std::sync` / `std::thread` — intervals, channels, atomics, barriers | website `standard-library-net-fs` | not specified |
 | `std::net` HTTP surface — `fetch`, `HttpListener`, `UdpSocket` | website `standard-library-net-fs` | not specified |
 | `std::fs` object surface — `File`, `Path`, `FileMode` | website `standard-library-net-fs` | not specified |
+| `std::io` generic surface — `Read`/`Write` traits over streams, files, sockets | design direction (Rust `std::io`, Go `io.Reader`) | not specified |
 | `std::math` extras — `Random`, `Matrix`, `Vector`, `Complex` | website `standard-library-net-fs` | not specified |
 | `std::time` extras — `Instant`, `Duration`, `DateTime` | website `standard-library-net-fs` | not specified |
 | `std::process` extras — `Command` builder | website `standard-library-net-fs` | not specified |
