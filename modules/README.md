@@ -19,7 +19,7 @@ common. Each member's meaning is specified in its own module chapter.
 | Module | What it covers | Chapter |
 |--------|----------------|---------|
 | `std::math` | mathematical constants; float and integer functions; random draws | [`math.md`](math.md) |
-| `std::time` | wall and monotonic clocks; sleep | [`time.md`](time.md) |
+| `std::time` | wall and monotonic clocks; sleep; ISO 8601 text and calendar fields | [`time.md`](time.md) |
 | `std::io` | the process streams: writes, flush, reads, terminal probes | [`io.md`](io.md) |
 | `std::fs` | whole-file read/write/append; timestamps; exclusive creation; inspection; copy and rename; existence; removal; directories and tree walk; temporaries | [`fs.md`](fs.md) |
 | `std::path` | portable POSIX path string operations | [`path.md`](path.md) |
@@ -143,7 +143,7 @@ of names its glob binds — coincides with the exports for nine modules, and
 | Module | Constants | Functions | Types |
 |--------|-----------|-----------|-------|
 | `std::math` | `PI` `E` `TAU` `INFINITY` `NAN` | `abs` `min` `max` `sign` `sqrt` `cbrt` `pow` `hypot` `clamp` `floor` `ceil` `round` `trunc` `toFixed` `sin` `cos` `tan` `asin` `acos` `atan` `atan2` `log` `log2` `log10` `log1p` `exp` `expm1` `random` `randomInt` `wrappingAdd` `wrappingSub` `wrappingMul` `popCount` `countLeadingZeros` `countTrailingZeros` `rotateLeft` `rotateRight` | — |
-| `std::time` | — | `now` `nowNanos` `monotonic` `monotonicNanos` `sleep` | — |
+| `std::time` | — | `now` `nowNanos` `monotonic` `monotonicNanos` `sleep` `format` `parse` `parts` `fromParts` `weekday` | — |
 | `std::io` | — | `print` `println` `eprint` `eprintln` `flush` `readLine` `read` `readN` `stdinIsTTY` `stdoutIsTTY` | — |
 | `std::fs` | — | `read` `write` `append` `createNew` `touch` `setTimes` `exists` `stat` `copy` `rename` `remove` `mkdir` `readDir` `walk` `removeDir` `tempFile` `tempDir` | — |
 | `std::path` | — | `join` `dirname` `basename` `ext` `normalize` | — |
@@ -314,7 +314,9 @@ discarding it is `E0218`.
 
 Where a chapter claims it, a conforming implementation produces the same
 result for the same inputs on every host: `std::json`'s output order, every
-`std::path` member, and every `std::regex` match are deterministic.
+`std::path` member, every `std::regex` match, and `std::time`'s calendar
+members (`format`, `parse`, `parts`, `fromParts`, `weekday`) are
+deterministic.
 Transcendental `std::math` functions (`sin`, `log`, `exp`, …) delegate to the
 host's math library and MAY differ from another implementation in the last
 bits; the classification rules (NaN, infinity), rounding, and wrapping

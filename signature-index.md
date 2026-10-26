@@ -43,6 +43,8 @@ returns no value at all.
 | `ext` | `fn(path: string): string` | `std::path` |
 | `floor` | `fn(x: float): int` | `std::math` |
 | `flush` | `fn(): Result<unit, Error>` | `std::io` |
+| `format` | `fn(ms: u64): string` | `std::time` |
+| `fromParts` | `fn(year: int, month: int, day: int, hour: int = 0, minute: int = 0, second: int = 0, millisecond: int = 0): u64` | `std::time` |
 | `getenv` | `fn(name: string): Result<string?, Error>` | `std::os` |
 | `hypot` | `fn(a: float, b: float): float` | `std::math` |
 | `INFINITY` | `float` (constant) | `std::math` |
@@ -61,6 +63,8 @@ returns no value at all.
 | `now` | `fn(): u64` | `std::time` |
 | `nowNanos` | `fn(): u64` | `std::time` |
 | `parse` | `fn(text: string): Result<any, Error>` | `std::json` |
+| `parse` | `fn(text: string): Result<u64, Error>` | `std::time` |
+| `parts` | `fn(ms: u64): { year: int, month: int, day: int, hour: int, minute: int, second: int, millisecond: int }` | `std::time` |
 | `PI` | `float` (constant) | `std::math` |
 | `pid` | `fn(): number` | `std::os` |
 | `platform` | `fn(): string` | `std::os` |
@@ -115,6 +119,7 @@ returns no value at all.
 | `trunc` | `fn(x: float): int` | `std::math` |
 | `valid` | `fn(text: string): bool` | `std::json` |
 | `walk` | `fn(path: string): Result<List<string>, Error>` | `std::fs` |
+| `weekday` | `fn(ms: u64): int` | `std::time` |
 | `wrappingAdd` | `fn(a: int, b: int): int` | `std::math` |
 | `wrappingMul` | `fn(a: int, b: int): int` | `std::math` |
 | `wrappingSub` | `fn(a: int, b: int): int` | `std::math` |
