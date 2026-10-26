@@ -25,7 +25,7 @@ common. Each member's meaning is specified in its own module chapter.
 | `std::path` | portable POSIX path string operations | [`path.md`](path.md) |
 | `std::os` | environment; working directory; host directories; process identity | [`os.md`](os.md) |
 | `std::net` | TCP sockets over opaque numeric handles | [`net.md`](net.md) |
-| `std::process` | exit status; argv; child capture | [`process.md`](process.md) |
+| `std::process` | exit status; argv; child capture; command building and child handles | [`process.md`](process.md) |
 | `std::json` | parse, stringify, and validate the JSON value model | [`json.md`](json.md) |
 | `std::regex` | `RegExp`, `RegexMatch`, substitution, and splitting | [`regex.md`](regex.md) |
 
@@ -149,7 +149,7 @@ of names its glob binds — coincides with the exports for nine modules, and
 | `std::path` | — | `isAbsolute` `join` `dirname` `basename` `split` `ext` `stem` `withExt` `normalize` `relative` | — |
 | `std::os` | — | `getenv` `setenv` `cwd` `chdir` `tmpDir` `homeDir` `pid` `platform` `arch` `hostName` `userName` `cpuCount` | — |
 | `std::net` | — | `tcp_listen` `tcp_accept` `tcp_connect` `sock_read` `sock_write` `sock_shutdown` `sock_close` `sock_local_addr` `sock_peer_addr` | — |
-| `std::process` | — | `exit` `args` `run` | — |
+| `std::process` | — | `exit` `args` `run` `exec` `launch` | `Command` `Child` |
 | `std::json` | — | `parse` `stringify` `valid` | — |
 | `std::regex` | — | — | `RegExp` `RegexError` `RegexMatch` |
 
@@ -181,9 +181,12 @@ A call to a `std` member is checked exactly like a call to any other
 function, against the signature this specification gives it:
 
 - **Arity** is fixed by the signature; too few or too many arguments are
-  `E0207`. Exactly two members accept an optional trailing argument —
-  `std::process::run` and `RegExp::compile` (1 or 2 arguments; the omitted
-  argument takes the default their chapters state).
+  `E0207`. Eight members accept optional trailing arguments, each with the
+  range its chapter states: `std::process::run` (1–3), `std::process::exec`
+  (2–4), `std::process::launch` (1–3), `RegExp::compile` (1–2),
+  `std::fs::tempFile` and `std::fs::tempDir` (0–1),
+  `std::json::stringify` (1–2), `std::time::fromParts` (3–7). An omitted
+  argument takes the default its chapter states.
 - **Argument types** are the signature's parameter types; a non-assignable
   argument is `E0202`. Literals coerce as the language's coercion table
   allows (`spec/expressions/literals.md`).
@@ -304,7 +307,8 @@ chapter says so where it matters.
 Every member of version 0.1 is synchronous: the call returns when the host
 operation completes. The members that can wait on the outside world for an
 unbounded time — the `std::io` readers (`readLine`, `read`, `readN`), the `std::net`
-openers and reads/writes, and `std::process::run` — are the **blocking
+openers and reads/writes, and the `std::process` child waiters (`run`,
+`exec`, `Command::run`, `Child::wait`) — are the **blocking
 members** named in the terminology table; while one waits, the caller does
 not make progress. Asynchronous
 variants are a roadmap candidate (`std::async`, [`../README.md`](../README.md)

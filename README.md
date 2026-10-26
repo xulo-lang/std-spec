@@ -69,7 +69,6 @@ implemented:
 | `std::io` generic surface — `Read`/`Write` traits over streams, files, sockets | design direction (Rust `std::io`, Go `io.Reader`) | not specified |
 | `std::math` extras — `Random`, `Matrix`, `Vector`, `Complex` | website `standard-library-net-fs` | not specified |
 | `std::time` extras — `Instant`, `Duration`, `DateTime` | website `standard-library-net-fs` | not specified |
-| `std::process` extras — `Command` builder | website `standard-library-net-fs` | not specified |
 
 ### 1.3 Language-specification dependencies
 
@@ -187,7 +186,7 @@ Additional conventions:
 | [`modules/path.md`](modules/path.md) | `std::path` — portable POSIX path string operations |
 | [`modules/os.md`](modules/os.md) | `std::os` — environment, working directory, host directories, process identity |
 | [`modules/net.md`](modules/net.md) | `std::net` — TCP sockets over opaque numeric handles |
-| [`modules/process.md`](modules/process.md) | `std::process` — exit status, argv, child capture |
+| [`modules/process.md`](modules/process.md) | `std::process` — exit status, argv, child capture, command building, child handles |
 | [`modules/json.md`](modules/json.md) | `std::json` — parse, stringify, and validate the JSON value model |
 | [`modules/regex.md`](modules/regex.md) | `std::regex` — `RegExp`, `RegexMatch`, substitution, and splitting |
 | [`signature-index.md`](signature-index.md) | Every member in one alphabetical index |
@@ -201,7 +200,7 @@ normative for the whole specification.
 | Term | Definition |
 |------|------------|
 | **absence** | The state a fallible-or-optional member reports instead of a failure: the `null` inside `T?`. End of stream, unset variable, no match — absence is ordinary data, never an `Err`. See [`modules/README.md`](modules/README.md). |
-| **blocking member** | A member whose call does not return until the host operation completes — in version 0.1 the `std::io` readers, the `std::net` openers and reads/writes, and `std::process::run`. See [`modules/README.md`](modules/README.md). |
+| **blocking member** | A member whose call does not return until the host operation completes — in version 0.1 the `std::io` readers, the `std::net` openers and reads/writes, and the `std::process` child waiters (`run`, `exec`, `Command::run`, `Child::wait`). See [`modules/README.md`](modules/README.md). |
 | **face** | The set of names a module's glob binds — `use std::math::*` binds the face. A module may export a name that its face withholds (see `std::io`). |
 | **fallible** | Of a member that returns `Result<T, Error>`: its failure is a value in the `Err` slot. |
 | **handle** | An opaque numeric name for a host resource — a socket — issued only by a `std::net` opener, accepted only by `std::net` members, and invalid after `sock_close`. |

@@ -25,7 +25,9 @@ returns no value at all.
 | `cbrt` | `fn(x: float): float` | `std::math` |
 | `ceil` | `fn(x: float): int` | `std::math` |
 | `chdir` | `fn(path: string): Result<unit, Error>` | `std::os` |
+| `Child` | type; methods `fn wait(): Result<{ stdout: string, stderr: string, code: number }, Error>`, `fn kill(): Result<unit, Error>`, `fn pid(): number` | `std::process` |
 | `clamp` | `fn(x: number, lo: number, hi: number): number` | `std::math` |
+| `Command` | type; static `fn shell(cmd: string): Command`, `fn direct(program: string, args: List<string>): Command`; setters `fn input(s: string): Command`, `fn cwd(path: string): Command`, `fn env(name: string, value: string): Command`, `fn timeout(ms: u64): Command`; methods `fn run(): Result<{ stdout: string, stderr: string, code: number }, Error>`, `fn launch(): Result<Child, Error>` | `std::process` |
 | `copy` | `fn(from: string, to: string): Result<unit, Error>` | `std::fs` |
 | `cos` | `fn(x: float): float` | `std::math` |
 | `countLeadingZeros` | `fn(x: int): int` | `std::math` |
@@ -37,6 +39,7 @@ returns no value at all.
 | `E` | `float` (constant) | `std::math` |
 | `eprint` | `fn(text: string): Result<unit, Error>` | `std::io` |
 | `eprintln` | `fn(text: string): Result<unit, Error>` | `std::io` |
+| `exec` | `fn(program: string, args: List<string>, input: string? = null, timeout: u64? = null): Result<{ stdout: string, stderr: string, code: number }, Error>` | `std::process` |
 | `exists` | `fn(path: string): bool` | `std::fs` |
 | `exit` | `fn(code: number): never` | `std::process` |
 | `exp` | `fn(x: float): float` | `std::math` |
@@ -53,6 +56,7 @@ returns no value at all.
 | `INFINITY` | `float` (constant) | `std::math` |
 | `isAbsolute` | `fn(path: string): bool` | `std::path` |
 | `join` | `fn(a: string, b: string): string` | `std::path` |
+| `launch` | `fn(cmd: string, input: string? = null, timeout: u64? = null): Result<Child, Error>` | `std::process` |
 | `log` | `fn(x: float): float` | `std::math` |
 | `log10` | `fn(x: float): float` | `std::math` |
 | `log1p` | `fn(x: float): float` | `std::math` |
@@ -93,7 +97,7 @@ returns no value at all.
 | `rotateLeft` | `fn(x: int, amount: u64): int` | `std::math` |
 | `rotateRight` | `fn(x: int, amount: u64): int` | `std::math` |
 | `round` | `fn(x: float): int` | `std::math` |
-| `run` | `fn(cmd: string, input: string? = null): Result<{ stdout: string, stderr: string, code: number }, Error>` | `std::process` |
+| `run` | `fn(cmd: string, input: string? = null, timeout: u64? = null): Result<{ stdout: string, stderr: string, code: number }, Error>` | `std::process` |
 | `setenv` | `fn(name: string, value: string): Result<unit, Error>` | `std::os` |
 | `setTimes` | `fn(path: string, modified: u64): Result<unit, Error>` | `std::fs` |
 | `sign` | `fn(x: number): number` | `std::math` |
