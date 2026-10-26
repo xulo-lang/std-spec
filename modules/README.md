@@ -23,7 +23,7 @@ common. Each member's meaning is specified in its own module chapter.
 | `std::io` | the process streams: writes, flush, reads, terminal probes | [`io.md`](io.md) |
 | `std::fs` | whole-file read/write/append; timestamps; exclusive creation; inspection; copy and rename; existence; removal; directories and tree walk; temporaries | [`fs.md`](fs.md) |
 | `std::path` | portable POSIX path string operations | [`path.md`](path.md) |
-| `std::os` | environment; working directory; process identity | [`os.md`](os.md) |
+| `std::os` | environment; working directory; host directories; process identity | [`os.md`](os.md) |
 | `std::net` | TCP sockets over opaque numeric handles | [`net.md`](net.md) |
 | `std::process` | exit status; argv; child capture | [`process.md`](process.md) |
 | `std::json` | parse, stringify, and validate the JSON value model | [`json.md`](json.md) |
@@ -147,7 +147,7 @@ of names its glob binds — coincides with the exports for nine modules, and
 | `std::io` | — | `print` `println` `eprint` `eprintln` `flush` `readLine` `read` `readN` `stdinIsTTY` `stdoutIsTTY` | — |
 | `std::fs` | — | `read` `write` `append` `createNew` `touch` `setTimes` `exists` `stat` `copy` `rename` `remove` `mkdir` `readDir` `walk` `removeDir` `tempFile` `tempDir` | — |
 | `std::path` | — | `isAbsolute` `join` `dirname` `basename` `split` `ext` `stem` `withExt` `normalize` | — |
-| `std::os` | — | `getenv` `setenv` `cwd` `chdir` `pid` `platform` `arch` | — |
+| `std::os` | — | `getenv` `setenv` `cwd` `chdir` `tmpDir` `homeDir` `pid` `platform` `arch` `hostName` `userName` `cpuCount` | — |
 | `std::net` | — | `tcp_listen` `tcp_accept` `tcp_connect` `sock_read` `sock_write` `sock_shutdown` `sock_close` `sock_local_addr` `sock_peer_addr` | — |
 | `std::process` | — | `exit` `args` `run` | — |
 | `std::json` | — | `parse` `stringify` `valid` | — |

@@ -30,6 +30,7 @@ returns no value at all.
 | `cos` | `fn(x: float): float` | `std::math` |
 | `countLeadingZeros` | `fn(x: int): int` | `std::math` |
 | `countTrailingZeros` | `fn(x: int): int` | `std::math` |
+| `cpuCount` | `fn(): number` | `std::os` |
 | `createNew` | `fn(path: string, contents: string): Result<unit, Error>` | `std::fs` |
 | `cwd` | `fn(): Result<string, Error>` | `std::os` |
 | `dirname` | `fn(path: string): string` | `std::path` |
@@ -46,6 +47,8 @@ returns no value at all.
 | `format` | `fn(ms: u64): string` | `std::time` |
 | `fromParts` | `fn(year: int, month: int, day: int, hour: int = 0, minute: int = 0, second: int = 0, millisecond: int = 0): u64` | `std::time` |
 | `getenv` | `fn(name: string): Result<string?, Error>` | `std::os` |
+| `homeDir` | `fn(): Result<string, Error>` | `std::os` |
+| `hostName` | `fn(): Result<string, Error>` | `std::os` |
 | `hypot` | `fn(a: float, b: float): float` | `std::math` |
 | `INFINITY` | `float` (constant) | `std::math` |
 | `isAbsolute` | `fn(path: string): bool` | `std::path` |
@@ -117,9 +120,11 @@ returns no value at all.
 | `tcp_listen` | `fn(addr: string): Result<number, Error>` | `std::net` |
 | `tempDir` | `fn(prefix: string? = null): Result<string, Error>` | `std::fs` |
 | `tempFile` | `fn(prefix: string? = null): Result<string, Error>` | `std::fs` |
+| `tmpDir` | `fn(): string` | `std::os` |
 | `toFixed` | `fn(x: float, digits: int): string` | `std::math` |
 | `touch` | `fn(path: string): Result<unit, Error>` | `std::fs` |
 | `trunc` | `fn(x: float): int` | `std::math` |
+| `userName` | `fn(): Result<string, Error>` | `std::os` |
 | `valid` | `fn(text: string): bool` | `std::json` |
 | `walk` | `fn(path: string): Result<List<string>, Error>` | `std::fs` |
 | `weekday` | `fn(ms: u64): int` | `std::time` |

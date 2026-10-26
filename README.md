@@ -185,7 +185,7 @@ Additional conventions:
 | [`modules/io.md`](modules/io.md) | `std::io` — the process streams: writes, flush, reads, terminal probes |
 | [`modules/fs.md`](modules/fs.md) | `std::fs` — whole-file read/write/append, timestamps, exclusive creation, inspection, copy/rename, existence, removal, directories, tree walk, temporaries |
 | [`modules/path.md`](modules/path.md) | `std::path` — portable POSIX path string operations |
-| [`modules/os.md`](modules/os.md) | `std::os` — environment, working directory, process identity |
+| [`modules/os.md`](modules/os.md) | `std::os` — environment, working directory, host directories, process identity |
 | [`modules/net.md`](modules/net.md) | `std::net` — TCP sockets over opaque numeric handles |
 | [`modules/process.md`](modules/process.md) | `std::process` — exit status, argv, child capture |
 | [`modules/json.md`](modules/json.md) | `std::json` — parse, stringify, and validate the JSON value model |
