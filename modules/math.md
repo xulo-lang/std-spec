@@ -1,10 +1,13 @@
 # `std::math`
 
 `std::math` holds the mathematical constants and functions: ordinary values
-and total operations over `float` and `int`, with no `Result`, no options, and
-no state — except `random`, the module's one stream member. The module is
-host-independent: the same inputs give the same results on every machine, up
-to the last bits of transcendental functions (§ 5.7 of
+and operations over `float` and `int`, with no `Result`, no options, and
+no state — except the two members that draw from the module's random stream.
+Every failure
+this chapter states is an argument domain, pinned in § Failure model.
+
+The module is host-independent: the same inputs give the same results on every
+machine, up to the last bits of transcendental functions (§ 5.7 of
 [`README.md`](README.md)).
 
 This module is the former prelude `Math` namespace moved under `std`; the
@@ -53,17 +56,45 @@ let nope = std::math::NAN             // ok: NaN — and nope != nope is true
 | `std::math::abs` | `fn(x: number): number` | absolute value |
 | `std::math::min` | `fn(a: number, b: number): number` | the smaller of two values |
 | `std::math::max` | `fn(a: number, b: number): number` | the larger of two values |
+| `std::math::sign` | `fn(x: number): number` | `-1`, `0`, or `1` by the sign of `x` |
 | `std::math::sqrt` | `fn(x: float): float` | square root |
 | `std::math::cbrt` | `fn(x: float): float` | cube root |
 | `std::math::pow` | `fn(base: float, exp: float): float` | `base` raised to `exp` |
+| `std::math::hypot` | `fn(a: float, b: float): float` | `sqrt(a² + b²)`, computed without intermediate overflow |
+| `std::math::clamp` | `fn(x: number, lo: number, hi: number): number` | `x` limited to `lo … hi` |
 
-- `abs`, `min`, and `max` are declared over `number`: an `int` or `float`
-  operand is accepted by union subtyping (`number = int | float`), a fixed-bit
-  operand is not, and neither is a `string`.
+- `abs`, `min`, `max`, `sign`, and `clamp` are declared over `number`: an
+  `int` or `float` operand is accepted by union subtyping
+  (`number = int | float`), a fixed-bit operand is not, and neither is a
+  `string`.
+- **`abs` of the most negative `int`** — `-9223372036854775808`, the one
+  value with no positive counterpart — yields that value itself: the
+  two's-complement image is all the `int` can hold (the rule Java gives
+  `Math.abs` for `long`). `abs` stays total.
 - A `NaN` operand propagates through `min` and `max`: the result is `NaN`,
   matching `abs(NaN)` and every other member below.
+- `sign` answers with the plain values `-1`, `0`, `1` — of the operand's
+  kind: an `int` operand gives an `int` value, a `float` operand a `float`
+  value. Either zero gives `0`, `-0` included; `NaN` gives `NaN`.
 - `sqrt` of a negative value yields `NaN`; `cbrt` is defined for every
   `float`, negative values included.
+- `hypot` is symmetric in its operands and never overflows on its own
+  squaring: `hypot(1e308, 1e308)` is finite where the naive
+  `sqrt(a*a + b*b)` is `Infinity`, and `hypot(0, 0)` is `0.0`. An infinite
+  operand gives infinity even when the other is `NaN` — IEEE-754's
+  ordering of the special cases — and otherwise a `NaN` operand gives
+  `NaN`.
+- `clamp` passes `x` through when it lies within `lo … hi` and returns the
+  bound it fell past when it does not. **`lo` greater than `hi` is a
+  runtime failure** (`spec/memory-and-runtime.md`) — an empty range admits
+  no value — and a `NaN` operand anywhere gives `NaN`.
+
+```xulo
+print(std::math::hypot(3, 4))          // runs: 5
+print(std::math::sign(-2.5))           // runs: -1
+print(std::math::clamp(9, 0, 5))       // runs: 5
+std::math::clamp(1, 5, 0)              // runtime failure: lo greater than hi
+```
 
 ## Rounding and narrowing
 
@@ -174,42 +205,69 @@ let bad = std::math::toFixed(1.5, 16)   // runtime failure: digits outside 0 …
 | `std::math::log` | `fn(x: float): float` | natural logarithm |
 | `std::math::log2` | `fn(x: float): float` | base-2 logarithm |
 | `std::math::log10` | `fn(x: float): float` | base-10 logarithm |
+| `std::math::log1p` | `fn(x: float): float` | natural logarithm of `1 + x`, accurate for small `x` |
 | `std::math::exp` | `fn(x: float): float` | `e` raised to `x` |
+| `std::math::expm1` | `fn(x: float): float` | `eˣ − 1`, accurate for small `x` |
 
 - `log`, `log2`, and `log10` yield `-Infinity` at `0` and `NaN` for a
   negative argument; `exp` yields `Infinity` once its result overflows.
+- `log1p` and `expm1` exist for precision: written the naive way,
+  `log(1 + x)` loses `x` entirely when it is far below the last bit of `1`
+  (`log(1 + 1e-17)` rounds to `0`) and `exp(x) − 1` loses it the same way;
+  this pair returns the full-precision result, and they are inverses of
+  each other. Their domains follow the pair they repair: `log1p(-1)` is
+  `-Infinity`, `log1p` below `-1` is `NaN`, and `expm1` overflows to
+  `Infinity`.
+
+```xulo
+print(std::math::log1p(1e-17))   // runs: 1e-17 — where log(1 + 1e-17) rounds to 0
+print(std::math::expm1(1e-17))   // runs: 1e-17 — where exp(1e-17) - 1 rounds to 0
+```
 
 ### IEEE-754 behaviour (whole module)
 
 Every `float` parameter and result follows IEEE-754 binary64: an operation
 outside its domain yields `NaN`, an overflow yields the appropriate infinity,
 and the special values propagate through further operations. No `std::math`
-member fails, panics, or returns `Result` — `NaN` and the infinities *are*
-its failure handling (`spec/types/primitive-types.md`).
+member returns `Result`, and no *float* operation fails or panics — `NaN` and
+the infinities *are* its failure handling (`spec/types/primitive-types.md`);
+the only failures are the argument domains § Failure model lists.
 
 ## Random
 
 | Member | Signature | Meaning |
 |--------|-----------|---------|
 | `std::math::random` | `fn(): float` | the next pseudo-random value in `[0.0, 1.0)` |
+| `std::math::randomInt` | `fn(lo: int, hi: int): int` | the next pseudo-random integer in `lo … hi`, both ends included |
 
 - The stream starts at a seed drawn from system entropy when the process
   starts; successive calls yield successive values of one generator, each
   53 random bits scaled by 2⁻⁵³ — `0.0` is possible, `1.0` is not.
 - The sequence is **not cryptographic** and not reproducible across runs; do
   not use it for security, salts, or anything that needs a predictable seed.
+- `randomInt` draws from that **same stream**: interleaving it with
+  `random` advances one sequence, under the same entropy-drawn seed and the
+  same non-cryptographic warning.
+- Every integer in `lo … hi` is **equally likely** — uniform over the
+  range, from a full 64-bit draw, so a range of any size up to the entire
+  `int` span draws uniformly (the 53-bit scale of `random` does not apply
+  to it). Both ends are included: `randomInt(1, 6)` is a die.
+- **`lo` greater than `hi` is a runtime failure**
+  (`spec/memory-and-runtime.md`) — an empty range has no member to draw.
 
 ```xulo
 let r = std::math::random()
 let inRange = r >= 0.0 && r < 1.0    // ok: always true
+let roll = std::math::randomInt(1, 6)   // ok: an int in 1 …= 6
+std::math::randomInt(6, 1)              // runtime failure: lo greater than hi
 ```
 
 ## Failure model
 
 | Kind | Members |
 |------|---------|
-| Total | every member — constants, `abs`/`min`/`max`, `sqrt`/`cbrt`/`pow`, the four rounding functions, the eight integer/bit functions, the trigonometric and logarithmic groups, `random` |
-| Runtime failure | `toFixed` with `digits` outside `0 …= 15`; a rounding function whose integral result falls outside `int`'s range |
+| Total | every member — constants, `abs`/`min`/`max`, `sqrt`/`cbrt`/`pow`/`hypot`/`sign`, the four rounding functions, the eight integer/bit functions, the trigonometric and logarithmic groups, `random` |
+| Runtime failure | `toFixed` with `digits` outside `0 …= 15`; a rounding function whose integral result falls outside `int`'s range; `clamp` and `randomInt` with `lo` greater than `hi` |
 | Fallible (`Result`) | none |
 
 ## Checked call examples
@@ -217,6 +275,9 @@ let inRange = r >= 0.0 && r < 1.0    // ok: always true
 ```xulo
 std::math::min(3, 9)                  // ok
 std::math::sqrt(4)                    // ok: 2 — an integer literal coerces to float
+std::math::hypot(3, 4)                // ok: 5
+std::math::sign(-2.5)                 // ok: -1
+std::math::clamp(9, 0, 5)             // ok: 5
 std::math::min("a", "b")              // error[E0202]: expected `number`, found `string`
 std::math::abs(1, 2)                  // error[E0207]: expected 1 argument, found 2
 std::math::PI(2.0)                    // error[E0204]: not callable

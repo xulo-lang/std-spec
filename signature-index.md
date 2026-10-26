@@ -25,6 +25,7 @@ returns no value at all.
 | `cbrt` | `fn(x: float): float` | `std::math` |
 | `ceil` | `fn(x: float): int` | `std::math` |
 | `chdir` | `fn(path: string): Result<unit, Error>` | `std::os` |
+| `clamp` | `fn(x: number, lo: number, hi: number): number` | `std::math` |
 | `copy` | `fn(from: string, to: string): Result<unit, Error>` | `std::fs` |
 | `cos` | `fn(x: float): float` | `std::math` |
 | `countLeadingZeros` | `fn(x: int): int` | `std::math` |
@@ -38,14 +39,17 @@ returns no value at all.
 | `exists` | `fn(path: string): bool` | `std::fs` |
 | `exit` | `fn(code: number): never` | `std::process` |
 | `exp` | `fn(x: float): float` | `std::math` |
+| `expm1` | `fn(x: float): float` | `std::math` |
 | `ext` | `fn(path: string): string` | `std::path` |
 | `floor` | `fn(x: float): int` | `std::math` |
 | `flush` | `fn(): Result<unit, Error>` | `std::io` |
 | `getenv` | `fn(name: string): Result<string?, Error>` | `std::os` |
+| `hypot` | `fn(a: float, b: float): float` | `std::math` |
 | `INFINITY` | `float` (constant) | `std::math` |
 | `join` | `fn(a: string, b: string): string` | `std::path` |
 | `log` | `fn(x: float): float` | `std::math` |
 | `log10` | `fn(x: float): float` | `std::math` |
+| `log1p` | `fn(x: float): float` | `std::math` |
 | `log2` | `fn(x: float): float` | `std::math` |
 | `max` | `fn(a: number, b: number): number` | `std::math` |
 | `mkdir` | `fn(path: string): Result<unit, Error>` | `std::fs` |
@@ -65,6 +69,7 @@ returns no value at all.
 | `print` | `fn(text: string): Result<unit, Error>` | `std::io` (not in the face) |
 | `println` | `fn(text: string): Result<unit, Error>` | `std::io` (not in the face) |
 | `random` | `fn(): float` | `std::math` |
+| `randomInt` | `fn(lo: int, hi: int): int` | `std::math` |
 | `read` | `fn(path: string): Result<string, Error>` | `std::fs` |
 | `read` | `fn(): Result<string, Error>` | `std::io` |
 | `readDir` | `fn(path: string): Result<List<string>, Error>` | `std::fs` |
@@ -82,6 +87,7 @@ returns no value at all.
 | `run` | `fn(cmd: string, input: string? = null): Result<{ stdout: string, stderr: string, code: number }, Error>` | `std::process` |
 | `setenv` | `fn(name: string, value: string): Result<unit, Error>` | `std::os` |
 | `setTimes` | `fn(path: string, modified: u64): Result<unit, Error>` | `std::fs` |
+| `sign` | `fn(x: number): number` | `std::math` |
 | `sin` | `fn(x: float): float` | `std::math` |
 | `sleep` | `fn(ms: u64): Task<unit>` | `std::time` |
 | `sock_close` | `fn(handle: number): Result<unit, Error>` | `std::net` |

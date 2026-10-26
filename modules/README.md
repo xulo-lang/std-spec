@@ -18,7 +18,7 @@ common. Each member's meaning is specified in its own module chapter.
 
 | Module | What it covers | Chapter |
 |--------|----------------|---------|
-| `std::math` | mathematical constants; float and integer functions; `random` | [`math.md`](math.md) |
+| `std::math` | mathematical constants; float and integer functions; random draws | [`math.md`](math.md) |
 | `std::time` | wall and monotonic clocks; sleep | [`time.md`](time.md) |
 | `std::io` | the process streams: writes, flush, reads, terminal probes | [`io.md`](io.md) |
 | `std::fs` | whole-file read/write/append; timestamps; exclusive creation; inspection; copy and rename; existence; removal; directories and tree walk; temporaries | [`fs.md`](fs.md) |
@@ -62,7 +62,7 @@ the last segment, or the name after `as`:
 | `use std::<module> as <alias>;` | the module's namespace under `<alias>` | `use std::io as io;` — then `io::print("x")` |
 | `use std::<module>::<name>;` | one member | `use std::math::floor;` — then `floor(3.7)` |
 | `use std::<module>::{a, b};` | a group of members | `use std::io::{flush, eprint};` |
-| `use std::<module>::*;` | the module's **face** (§ 3) | `use std::math::*;` — the constants and 31 functions |
+| `use std::<module>::*;` | the module's **face** (§ 3) | `use std::math::*;` — the constants and 37 functions |
 | `use type std::<module>::<Type>;` | a name for types only | `use type std::regex::RegExp;` |
 
 Notes:
@@ -142,7 +142,7 @@ of names its glob binds — coincides with the exports for nine modules, and
 
 | Module | Constants | Functions | Types |
 |--------|-----------|-----------|-------|
-| `std::math` | `PI` `E` `TAU` `INFINITY` `NAN` | `abs` `min` `max` `sqrt` `cbrt` `pow` `floor` `ceil` `round` `trunc` `toFixed` `sin` `cos` `tan` `asin` `acos` `atan` `atan2` `log` `log2` `log10` `exp` `random` `wrappingAdd` `wrappingSub` `wrappingMul` `popCount` `countLeadingZeros` `countTrailingZeros` `rotateLeft` `rotateRight` | — |
+| `std::math` | `PI` `E` `TAU` `INFINITY` `NAN` | `abs` `min` `max` `sign` `sqrt` `cbrt` `pow` `hypot` `clamp` `floor` `ceil` `round` `trunc` `toFixed` `sin` `cos` `tan` `asin` `acos` `atan` `atan2` `log` `log2` `log10` `log1p` `exp` `expm1` `random` `randomInt` `wrappingAdd` `wrappingSub` `wrappingMul` `popCount` `countLeadingZeros` `countTrailingZeros` `rotateLeft` `rotateRight` | — |
 | `std::time` | — | `now` `nowNanos` `monotonic` `monotonicNanos` `sleep` | — |
 | `std::io` | — | `print` `println` `eprint` `eprintln` `flush` `readLine` `read` `readN` `stdinIsTTY` `stdoutIsTTY` | — |
 | `std::fs` | — | `read` `write` `append` `createNew` `touch` `setTimes` `exists` `stat` `copy` `rename` `remove` `mkdir` `readDir` `walk` `removeDir` `tempFile` `tempDir` | — |
