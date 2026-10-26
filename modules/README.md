@@ -21,7 +21,7 @@ common. Each member's meaning is specified in its own module chapter.
 | `std::math` | mathematical constants; float and integer functions; `random` | [`math.md`](math.md) |
 | `std::time` | wall and monotonic clocks; sleep | [`time.md`](time.md) |
 | `std::io` | the process streams: writes, flush, line and stream reads | [`io.md`](io.md) |
-| `std::fs` | whole-file read and write; existence; removal; directories | [`fs.md`](fs.md) |
+| `std::fs` | whole-file read/write/append; timestamps; exclusive creation; inspection; copy and rename; existence; removal; directories and tree walk; temporaries | [`fs.md`](fs.md) |
 | `std::path` | portable POSIX path string operations | [`path.md`](path.md) |
 | `std::os` | environment; working directory; process identity | [`os.md`](os.md) |
 | `std::net` | TCP sockets over opaque numeric handles | [`net.md`](net.md) |
@@ -145,7 +145,7 @@ of names its glob binds — coincides with the exports for nine modules, and
 | `std::math` | `PI` `E` `TAU` `INFINITY` `NAN` | `abs` `min` `max` `sqrt` `cbrt` `pow` `floor` `ceil` `round` `trunc` `toFixed` `sin` `cos` `tan` `asin` `acos` `atan` `atan2` `log` `log2` `log10` `exp` `random` `wrappingAdd` `wrappingSub` `wrappingMul` `popCount` `countLeadingZeros` `countTrailingZeros` `rotateLeft` `rotateRight` | — |
 | `std::time` | — | `now` `nowNanos` `monotonic` `monotonicNanos` `sleep` | — |
 | `std::io` | — | `print` `println` `eprint` `eprintln` `flush` `readLine` `read` | — |
-| `std::fs` | — | `read` `write` `exists` `remove` `mkdir` | — |
+| `std::fs` | — | `read` `write` `append` `createNew` `touch` `setTimes` `exists` `stat` `copy` `rename` `remove` `mkdir` `readDir` `walk` `removeDir` `tempFile` `tempDir` | — |
 | `std::path` | — | `join` `dirname` `basename` `ext` `normalize` | — |
 | `std::os` | — | `getenv` `setenv` `cwd` `chdir` `pid` `platform` `arch` | — |
 | `std::net` | — | `tcp_listen` `tcp_accept` `tcp_connect` `sock_read` `sock_write` `sock_shutdown` `sock_close` `sock_local_addr` `sock_peer_addr` | — |

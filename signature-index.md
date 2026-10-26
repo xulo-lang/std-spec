@@ -15,6 +15,7 @@ returns no value at all.
 |--------|-----------|--------|
 | `abs` | `fn(x: number): number` | `std::math` |
 | `acos` | `fn(x: float): float` | `std::math` |
+| `append` | `fn(path: string, contents: string): Result<unit, Error>` | `std::fs` |
 | `arch` | `fn(): string` | `std::os` |
 | `args` | `fn(): List<string>` | `std::process` |
 | `asin` | `fn(x: float): float` | `std::math` |
@@ -24,9 +25,11 @@ returns no value at all.
 | `cbrt` | `fn(x: float): float` | `std::math` |
 | `ceil` | `fn(x: float): int` | `std::math` |
 | `chdir` | `fn(path: string): Result<unit, Error>` | `std::os` |
+| `copy` | `fn(from: string, to: string): Result<unit, Error>` | `std::fs` |
 | `cos` | `fn(x: float): float` | `std::math` |
 | `countLeadingZeros` | `fn(x: int): int` | `std::math` |
 | `countTrailingZeros` | `fn(x: int): int` | `std::math` |
+| `createNew` | `fn(path: string, contents: string): Result<unit, Error>` | `std::fs` |
 | `cwd` | `fn(): Result<string, Error>` | `std::os` |
 | `dirname` | `fn(path: string): string` | `std::path` |
 | `E` | `float` (constant) | `std::math` |
@@ -64,16 +67,20 @@ returns no value at all.
 | `random` | `fn(): float` | `std::math` |
 | `read` | `fn(path: string): Result<string, Error>` | `std::fs` |
 | `read` | `fn(): Result<string, Error>` | `std::io` |
+| `readDir` | `fn(path: string): Result<List<string>, Error>` | `std::fs` |
 | `readLine` | `fn(): Result<string?, Error>` | `std::io` |
 | `RegexError` | type `{ message: string }`; constructed only by `RegExp::compile`'s `Err` | `std::regex` |
 | `RegexMatch` | type `{ value: string }` with `fn group(index: number): string?` | `std::regex` |
 | `RegExp` | type; static `fn compile(pattern: string, flags: string?): Result<RegExp, RegexError>`; methods `fn test(input: string): bool`, `fn find(input: string): RegexMatch?`, `fn find_all(input: string): List<RegexMatch>` | `std::regex` |
 | `remove` | `fn(path: string): Result<unit, Error>` | `std::fs` |
+| `removeDir` | `fn(path: string): Result<unit, Error>` | `std::fs` |
+| `rename` | `fn(from: string, to: string): Result<unit, Error>` | `std::fs` |
 | `rotateLeft` | `fn(x: int, amount: u64): int` | `std::math` |
 | `rotateRight` | `fn(x: int, amount: u64): int` | `std::math` |
 | `round` | `fn(x: float): int` | `std::math` |
 | `run` | `fn(cmd: string, input: string? = null): Result<{ stdout: string, stderr: string, code: number }, Error>` | `std::process` |
 | `setenv` | `fn(name: string, value: string): Result<unit, Error>` | `std::os` |
+| `setTimes` | `fn(path: string, modified: u64): Result<unit, Error>` | `std::fs` |
 | `sin` | `fn(x: float): float` | `std::math` |
 | `sleep` | `fn(ms: u64): Task<unit>` | `std::time` |
 | `sock_close` | `fn(handle: number): Result<unit, Error>` | `std::net` |
@@ -83,6 +90,7 @@ returns no value at all.
 | `sock_shutdown` | `fn(handle: number): Result<unit, Error>` | `std::net` |
 | `sock_write` | `fn(handle: number, data: string): Result<number, Error>` | `std::net` |
 | `sqrt` | `fn(x: float): float` | `std::math` |
+| `stat` | `fn(path: string): Result<{ kind: string, size: number, modified: u64 }, Error>` | `std::fs` |
 | `string.replace` | `fn(pattern: RegExp, replacer: string \| fn(RegexMatch): string): string` | `std::regex` |
 | `stringify` | `fn(value: any): Result<string, Error>` | `std::json` |
 | `tan` | `fn(x: float): float` | `std::math` |
@@ -90,8 +98,12 @@ returns no value at all.
 | `tcp_accept` | `fn(handle: number): Result<number, Error>` | `std::net` |
 | `tcp_connect` | `fn(addr: string): Result<number, Error>` | `std::net` |
 | `tcp_listen` | `fn(addr: string): Result<number, Error>` | `std::net` |
+| `tempDir` | `fn(prefix: string? = null): Result<string, Error>` | `std::fs` |
+| `tempFile` | `fn(prefix: string? = null): Result<string, Error>` | `std::fs` |
 | `toFixed` | `fn(x: float, digits: int): string` | `std::math` |
+| `touch` | `fn(path: string): Result<unit, Error>` | `std::fs` |
 | `trunc` | `fn(x: float): int` | `std::math` |
+| `walk` | `fn(path: string): Result<List<string>, Error>` | `std::fs` |
 | `wrappingAdd` | `fn(a: int, b: int): int` | `std::math` |
 | `wrappingMul` | `fn(a: int, b: int): int` | `std::math` |
 | `wrappingSub` | `fn(a: int, b: int): int` | `std::math` |
