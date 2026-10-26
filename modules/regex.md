@@ -151,8 +151,8 @@ match RegExp::compile("(\\d+)-(\\d+)") {
     Result::Ok(re) => {
         let m = re.find("room 42-7")
         if m != null {
-            print(m.value, m.group(1), m.group(2))  // runs: 42-7 42 7
-            print(m.index, m.end)                   // runs: 5 9
+            print(`${m.value} ${m.group(1)} ${m.group(2)}`)  // runs: 42-7 42 7
+            print(`${m.index} ${m.end}`)                     // runs: 5 9
         } else {
             print("miss")
         }
