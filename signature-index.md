@@ -58,8 +58,8 @@ returns no value at all.
 | `log1p` | `fn(x: float): float` | `std::math` |
 | `log2` | `fn(x: float): float` | `std::math` |
 | `max` | `fn(a: number, b: number): number` | `std::math` |
-| `mkdir` | `fn(path: string): Result<unit, Error>` | `std::fs` |
 | `min` | `fn(a: number, b: number): number` | `std::math` |
+| `mkdir` | `fn(path: string): Result<unit, Error>` | `std::fs` |
 | `monotonic` | `fn(): u64` | `std::time` |
 | `monotonicNanos` | `fn(): u64` | `std::time` |
 | `NAN` | `float` (constant) | `std::math` |
