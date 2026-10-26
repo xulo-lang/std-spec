@@ -2,10 +2,12 @@
 
 `std::path` holds pure string operations on `/`-separated paths: joining,
 testing for an absolute path, taking the parent, the final component, its
-stem and extension, splitting those apart, replacing an extension, and
-normalizing away redundancy. Every member is total — `""`, all slashes, and
-a lone `..` each have a defined answer — so the module has no `Result`, no
-absence, and no runtime failure. It is the portable companion to
+stem and extension, splitting those apart, replacing an extension,
+normalizing away redundancy, and naming one path relative to another. Every
+member answers every input — `""`, all slashes, and a lone `..` each have a
+defined answer — so the module has no `Result` and no runtime failure;
+`relative` alone may return `null`, for the two relations no string can
+name. It is the portable companion to
 [`std::fs`](fs.md): it applies POSIX rules on every host, while `fs` follows
 the host's conventions ([`README.md`](README.md) § 5.5).
 
@@ -193,6 +195,38 @@ print(std::path::normalize(""))              // runs: .
 print(std::path::normalize("///"))           // runs: /
 ```
 
+## Relative
+
+| Member | Signature | Meaning |
+|--------|-----------|---------|
+| `std::path::relative` | `fn(from: string, to: string): string?` | the path that walks from `from` to `to`, or `null` when no such string exists |
+
+- Both inputs are normalized first, then their shared leading components are
+  cancelled; each component left in `from` becomes `..`, followed by what is
+  left of `to`. Two absolute paths always answer — they share the root — so
+  `relative("/a/b", "/a/c")` yields `"../c"`.
+- `null` is **absence, not failure**, and it arises in exactly two cases,
+  each meaning no string can name the relation:
+  1. one side is absolute and the other relative — nothing anchors them
+     together (`relative("/a", "b")`);
+  2. both are relative, but after cancelling, `from` still has a `..` left —
+     climbing above the shared anchor would need the anchor's own name,
+     which the two strings do not carry (`relative("../a", "b")`).
+
+  A `..` left in `to` needs no name and stays a `..` in the answer.
+- A result with nothing left is `"."` for relative inputs and `"/"` for
+  absolute ones — the Normalization rule.
+- The answer is what a program joins onto `from`: normalizing
+  `join(from, relative(from, to))` reproduces `to`.
+
+```xulo
+print(std::path::relative("/var/log", "/etc"))  // runs: ../../etc
+print(std::path::relative("a/x", "b"))          // runs: ../../b
+print(std::path::relative("a/b", "a/c"))        // runs: ../c
+std::path::relative("/a", "b")                  // ok: null — one absolute, one relative
+std::path::relative("../a", "b")                // ok: null — `from` would climb above the anchor
+```
+
 ### Relationship to `std::fs`
 
 `std::fs` takes raw path strings and follows the host's conventions;
@@ -205,21 +239,23 @@ predict what `fs` will do on another
 
 ### Totality (whole module)
 
-No `std::path` member returns `Result` or `null`, touches the filesystem, or
-stops the program on the program's own inputs: every degenerate argument —
-`""`, an all-slash path, a lone `..`, an absolute right operand to `join` —
-has a defined string answer. The nine results are fixed for every input and
-identical on every host
+No `std::path` member returns `Result`, touches the filesystem, or stops the
+program on the program's own inputs: every degenerate argument — `""`, an
+all-slash path, a lone `..`, an absolute right operand to `join` — has a
+defined answer. Nine members return a string for every input; `relative`
+returns a string or `null`, and its `null` is the absence
+[`README.md`](README.md) § 5.2 defines, never an `Err`. Every answer is
+fixed for its input and identical on every host
 ([`README.md`](README.md) § 5.7).
 
 ## Failure model
 
 | Kind | Members |
 |------|---------|
-| Total | every member — `isAbsolute`, `join`, `dirname`, `basename`, `split`, `ext`, `stem`, `withExt`, `normalize` |
+| Total | every member except `relative` — `isAbsolute`, `join`, `dirname`, `basename`, `split`, `ext`, `stem`, `withExt`, `normalize` |
 | Runtime failure | none |
 | Fallible (`Result`) | none |
-| Absence (`null`) | none |
+| Absence (`null`) | `relative` when no relative path exists — one side absolute and the other relative, or `from` would climb above the shared anchor |
 
 ## Checked call examples
 
@@ -229,5 +265,7 @@ std::path::join("a")                      // error[E0207]: expected 2 arguments,
 std::path::join("a", 1)                   // error[E0202]: expected `string`, found `int`
 std::path::withExt("a")                   // error[E0207]: expected 2 arguments, found 1
 std::path::stem(1)                        // error[E0202]: expected `string`, found `int`
+std::path::relative("/a", "b")            // ok: null — the two frames do not share one
+std::path::relative("/a/b")               // error[E0207]: expected 2 arguments, found 1
 Path::join("a", "b")                      // error[E0607]: `Path` lives under `std`: use `std::path::join`
 ```

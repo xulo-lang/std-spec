@@ -86,6 +86,7 @@ returns no value at all.
 | `RegexError` | type `{ message: string }`; constructed only by `RegExp::compile`'s `Err` | `std::regex` |
 | `RegexMatch` | type `{ value: string, index: int, end: int }` with `fn group(ref: number \| string): string?` | `std::regex` |
 | `RegExp` | type; static `fn compile(pattern: string, flags: string?): Result<RegExp, RegexError>`; methods `fn test(input: string): bool`, `fn find(input: string): RegexMatch?`, `fn find_all(input: string): List<RegexMatch>` | `std::regex` |
+| `relative` | `fn(from: string, to: string): string?` | `std::path` |
 | `remove` | `fn(path: string): Result<unit, Error>` | `std::fs` |
 | `removeDir` | `fn(path: string): Result<unit, Error>` | `std::fs` |
 | `rename` | `fn(from: string, to: string): Result<unit, Error>` | `std::fs` |

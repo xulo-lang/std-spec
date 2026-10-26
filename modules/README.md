@@ -146,7 +146,7 @@ of names its glob binds — coincides with the exports for nine modules, and
 | `std::time` | — | `now` `nowNanos` `monotonic` `monotonicNanos` `sleep` `format` `parse` `parts` `fromParts` `weekday` | — |
 | `std::io` | — | `print` `println` `eprint` `eprintln` `flush` `readLine` `read` `readN` `stdinIsTTY` `stdoutIsTTY` | — |
 | `std::fs` | — | `read` `write` `append` `createNew` `touch` `setTimes` `exists` `stat` `copy` `rename` `remove` `mkdir` `readDir` `walk` `removeDir` `tempFile` `tempDir` | — |
-| `std::path` | — | `isAbsolute` `join` `dirname` `basename` `split` `ext` `stem` `withExt` `normalize` | — |
+| `std::path` | — | `isAbsolute` `join` `dirname` `basename` `split` `ext` `stem` `withExt` `normalize` `relative` | — |
 | `std::os` | — | `getenv` `setenv` `cwd` `chdir` `tmpDir` `homeDir` `pid` `platform` `arch` `hostName` `userName` `cpuCount` | — |
 | `std::net` | — | `tcp_listen` `tcp_accept` `tcp_connect` `sock_read` `sock_write` `sock_shutdown` `sock_close` `sock_local_addr` `sock_peer_addr` | — |
 | `std::process` | — | `exit` `args` `run` | — |
@@ -256,13 +256,15 @@ the failure *classes* a chapter enumerates.
 ### 5.2 Absence is `null`
 
 A member whose result may simply *not exist* — end of stream, an unset
-variable, no match — returns `T?` and yields `null` for that case. Absence is
-data, not failure, and a member never reports it as `Err`:
+variable, no match, a relation no string can name — returns `T?` and yields
+`null` for that case. Absence is data, not failure, and a member never
+reports it as `Err`:
 
 | Absence | Member |
 |---------|--------|
 | end of input | `std::io::readLine()` → `null`; `std::io::readN(max)` → `null` |
 | no match | `std::regex::RegExp.find` → `null`; `RegexMatch.group` → `null` for group 0, out of range, a non-participating group, or an unknown name |
+| no relative path | `std::path::relative` → `null` when one side is absolute and the other relative, or when `from` would climb above the shared anchor |
 | variable not set | `std::os::getenv` → `Ok(null)` (set but the operation failed → `Err`) |
 
 ### 5.3 Total, fallible, and runtime failure
