@@ -26,7 +26,7 @@ common. Each member's meaning is specified in its own module chapter.
 | `std::os` | environment; working directory; process identity | [`os.md`](os.md) |
 | `std::net` | TCP sockets over opaque numeric handles | [`net.md`](net.md) |
 | `std::process` | exit status; argv; child capture | [`process.md`](process.md) |
-| `std::json` | parse and stringify the JSON value model | [`json.md`](json.md) |
+| `std::json` | parse, stringify, and validate the JSON value model | [`json.md`](json.md) |
 | `std::regex` | `RegExp`, `RegexMatch`, and substitution | [`regex.md`](regex.md) |
 
 ## 2. Reaching the standard library
@@ -150,7 +150,7 @@ of names its glob binds — coincides with the exports for nine modules, and
 | `std::os` | — | `getenv` `setenv` `cwd` `chdir` `pid` `platform` `arch` | — |
 | `std::net` | — | `tcp_listen` `tcp_accept` `tcp_connect` `sock_read` `sock_write` `sock_shutdown` `sock_close` `sock_local_addr` `sock_peer_addr` | — |
 | `std::process` | — | `exit` `args` `run` | — |
-| `std::json` | — | `parse` `stringify` | — |
+| `std::json` | — | `parse` `stringify` `valid` | — |
 | `std::regex` | — | — | `RegExp` `RegexError` `RegexMatch` |
 
 **`std::io` exports ten functions and withholds two from its face.**

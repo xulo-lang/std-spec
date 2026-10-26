@@ -187,7 +187,7 @@ Additional conventions:
 | [`modules/os.md`](modules/os.md) | `std::os` — environment, working directory, process identity |
 | [`modules/net.md`](modules/net.md) | `std::net` — TCP sockets over opaque numeric handles |
 | [`modules/process.md`](modules/process.md) | `std::process` — exit status, argv, child capture |
-| [`modules/json.md`](modules/json.md) | `std::json` — parse and stringify the JSON value model |
+| [`modules/json.md`](modules/json.md) | `std::json` — parse, stringify, and validate the JSON value model |
 | [`modules/regex.md`](modules/regex.md) | `std::regex` — `RegExp`, `RegexMatch`, and substitution |
 | [`signature-index.md`](signature-index.md) | Every member in one alphabetical index |
 | [`changes/`](changes/README.md) | Incremental change proposals (OpenSpec style) |

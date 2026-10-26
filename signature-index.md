@@ -95,7 +95,7 @@ returns no value at all.
 | `stdinIsTTY` | `fn(): bool` | `std::io` |
 | `stdoutIsTTY` | `fn(): bool` | `std::io` |
 | `string.replace` | `fn(pattern: RegExp, replacer: string \| fn(RegexMatch): string): string` | `std::regex` |
-| `stringify` | `fn(value: any): Result<string, Error>` | `std::json` |
+| `stringify` | `fn(value: any, indent: number? = null): Result<string, Error>` | `std::json` |
 | `tan` | `fn(x: float): float` | `std::math` |
 | `TAU` | `float` (constant) | `std::math` |
 | `tcp_accept` | `fn(handle: number): Result<number, Error>` | `std::net` |
@@ -106,6 +106,7 @@ returns no value at all.
 | `toFixed` | `fn(x: float, digits: int): string` | `std::math` |
 | `touch` | `fn(path: string): Result<unit, Error>` | `std::fs` |
 | `trunc` | `fn(x: float): int` | `std::math` |
+| `valid` | `fn(text: string): bool` | `std::json` |
 | `walk` | `fn(path: string): Result<List<string>, Error>` | `std::fs` |
 | `wrappingAdd` | `fn(a: int, b: int): int` | `std::math` |
 | `wrappingMul` | `fn(a: int, b: int): int` | `std::math` |
