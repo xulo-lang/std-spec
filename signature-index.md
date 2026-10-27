@@ -16,6 +16,7 @@ returns no value at all.
 | `abs` | `fn(x: number): number` | `std::math` |
 | `acos` | `fn(x: float): float` | `std::math` |
 | `append` | `fn(path: string, contents: string): Result<unit, Error>` | `std::fs` |
+| `appendBytes` | `fn(path: string, bytes: List<u8>): Result<unit, Error>` | `std::fs` |
 | `arch` | `fn(): string` | `std::os` |
 | `args` | `fn(): List<string>` | `std::process` |
 | `asin` | `fn(x: float): float` | `std::math` |
@@ -86,6 +87,7 @@ returns no value at all.
 | `randomInt` | `fn(lo: int, hi: int): int` | `std::math` |
 | `read` | `fn(path: string): Result<string, Error>` | `std::fs` |
 | `read` | `fn(): Result<string, Error>` | `std::io` |
+| `readBytes` | `fn(path: string): Result<List<u8>, Error>` | `std::fs` |
 | `readDir` | `fn(path: string): Result<List<string>, Error>` | `std::fs` |
 | `readLine` | `fn(): Result<string?, Error>` | `std::io` |
 | `readN` | `fn(max: number): Result<string?, Error>` | `std::io` |
@@ -105,6 +107,7 @@ returns no value at all.
 | `run` | `fn(cmd: string, input: string? = null, timeout: u64? = null): Result<{ stdout: string, stderr: string, code: number }, Error>` | `std::process` |
 | `Server` | type; methods `fn addr(): Result<string, Error>`, `fn serve(handler: fn(Request): Response): Result<unit, Error>`; constructed only by `listen` | `std::http` |
 | `setenv` | `fn(name: string, value: string): Result<unit, Error>` | `std::os` |
+| `setMode` | `fn(path: string, mode: number): Result<unit, Error>` | `std::fs` |
 | `setTimes` | `fn(path: string, modified: u64): Result<unit, Error>` | `std::fs` |
 | `sign` | `fn(x: number): number` | `std::math` |
 | `sin` | `fn(x: float): float` | `std::math` |
@@ -118,7 +121,7 @@ returns no value at all.
 | `sock_write` | `fn(handle: number, data: string, timeout: u64? = null): Result<number, Error>` | `std::net` |
 | `split` | `fn(path: string): { dir: string, base: string, ext: string }` | `std::path` |
 | `sqrt` | `fn(x: float): float` | `std::math` |
-| `stat` | `fn(path: string): Result<{ kind: string, size: number, modified: u64 }, Error>` | `std::fs` |
+| `stat` | `fn(path: string): Result<{ kind: string, size: number, modified: u64, mode: number }, Error>` | `std::fs` |
 | `stdinIsTTY` | `fn(): bool` | `std::io` |
 | `stdoutIsTTY` | `fn(): bool` | `std::io` |
 | `stem` | `fn(path: string): string` | `std::path` |
@@ -131,7 +134,9 @@ returns no value at all.
 | `tcp_connect` | `fn(addr: string, timeout: u64? = null): Result<number, Error>` | `std::net` |
 | `tcp_listen` | `fn(addr: string): Result<number, Error>` | `std::net` |
 | `tempDir` | `fn(prefix: string? = null): Result<string, Error>` | `std::fs` |
+| `tempDirIn` | `fn(dir: string, prefix: string? = null): Result<string, Error>` | `std::fs` |
 | `tempFile` | `fn(prefix: string? = null): Result<string, Error>` | `std::fs` |
+| `tempFileIn` | `fn(dir: string, prefix: string? = null): Result<string, Error>` | `std::fs` |
 | `tmpDir` | `fn(): string` | `std::os` |
 | `toFixed` | `fn(x: float, digits: int): string` | `std::math` |
 | `touch` | `fn(path: string): Result<unit, Error>` | `std::fs` |
@@ -145,3 +150,4 @@ returns no value at all.
 | `wrappingMul` | `fn(a: int, b: int): int` | `std::math` |
 | `wrappingSub` | `fn(a: int, b: int): int` | `std::math` |
 | `write` | `fn(path: string, contents: string): Result<unit, Error>` | `std::fs` |
+| `writeBytes` | `fn(path: string, bytes: List<u8>): Result<unit, Error>` | `std::fs` |

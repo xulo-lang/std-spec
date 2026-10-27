@@ -21,7 +21,7 @@ common. Each member's meaning is specified in its own module chapter.
 | `std::math` | mathematical constants; float and integer functions; random draws | [`math.md`](math.md) |
 | `std::time` | wall and monotonic clocks; sleep; ISO 8601 text and calendar fields | [`time.md`](time.md) |
 | `std::io` | the process streams: writes, flush, reads, terminal probes | [`io.md`](io.md) |
-| `std::fs` | whole-file read/write/append; timestamps; exclusive creation; inspection; copy and rename; existence; removal; directories and tree walk; temporaries | [`fs.md`](fs.md) |
+| `std::fs` | whole-file read/write/append in text and bytes; timestamps; permission bits; exclusive creation; inspection; copy and rename; existence; removal; directories and tree walk; temporaries | [`fs.md`](fs.md) |
 | `std::path` | portable POSIX path string operations | [`path.md`](path.md) |
 | `std::os` | environment; working directory; host directories; process identity | [`os.md`](os.md) |
 | `std::net` | TCP sockets over opaque numeric handles | [`net.md`](net.md) |
@@ -146,7 +146,7 @@ of names its glob binds — coincides with the exports for ten modules, and
 | `std::math` | `PI` `E` `TAU` `INFINITY` `NAN` | `abs` `min` `max` `sign` `sqrt` `cbrt` `pow` `hypot` `clamp` `floor` `ceil` `round` `trunc` `toFixed` `sin` `cos` `tan` `asin` `acos` `atan` `atan2` `log` `log2` `log10` `log1p` `exp` `expm1` `random` `randomInt` `wrappingAdd` `wrappingSub` `wrappingMul` `popCount` `countLeadingZeros` `countTrailingZeros` `rotateLeft` `rotateRight` | — |
 | `std::time` | — | `now` `nowNanos` `monotonic` `monotonicNanos` `sleep` `format` `parse` `parts` `fromParts` `weekday` | — |
 | `std::io` | — | `print` `println` `eprint` `eprintln` `flush` `readLine` `read` `readN` `stdinIsTTY` `stdoutIsTTY` | — |
-| `std::fs` | — | `read` `write` `append` `createNew` `touch` `setTimes` `exists` `stat` `copy` `rename` `remove` `mkdir` `readDir` `walk` `removeDir` `tempFile` `tempDir` | — |
+| `std::fs` | — | `read` `readBytes` `write` `writeBytes` `append` `appendBytes` `createNew` `touch` `setTimes` `setMode` `exists` `stat` `copy` `rename` `remove` `mkdir` `readDir` `walk` `removeDir` `tempFile` `tempFileIn` `tempDir` `tempDirIn` | — |
 | `std::path` | — | `isAbsolute` `join` `dirname` `basename` `split` `ext` `stem` `withExt` `normalize` `relative` | — |
 | `std::os` | — | `getenv` `setenv` `cwd` `chdir` `tmpDir` `homeDir` `pid` `platform` `arch` `hostName` `userName` `cpuCount` | — |
 | `std::net` | — | `tcp_listen` `tcp_accept` `tcp_connect` `sock_read` `sock_write` `sock_shutdown` `sock_shutdown_write` `sock_close` `sock_local_addr` `sock_peer_addr` | — |
@@ -183,7 +183,7 @@ A call to a `std` member is checked exactly like a call to any other
 function, against the signature this specification gives it:
 
 - **Arity** is fixed by the signature; too few or too many arguments are
-  `E0207`. Sixteen members accept optional trailing arguments, each with
+  `E0207`. Eighteen members accept optional trailing arguments, each with
   the range its chapter states: `std::process::run` (1–3), `std::process::exec`
   (2–4), `std::process::launch` (1–3), `std::net::tcp_connect` (1–2),
   `std::net::tcp_accept` (1–2), `std::net::sock_read` (2–3),
@@ -191,6 +191,7 @@ function, against the signature this specification gives it:
   `std::http::request` (2–5), `Response::text` (1–2),
   `Response::json` (1–2), `RegExp::compile` (1–2),
   `std::fs::tempFile` and `std::fs::tempDir` (0–1),
+  `std::fs::tempFileIn` and `std::fs::tempDirIn` (1–2),
   `std::json::stringify` (1–2), `std::time::fromParts` (3–7). An omitted
   argument takes the default its chapter states.
 - **Argument types** are the signature's parameter types; a non-assignable
@@ -335,3 +336,18 @@ Transcendental `std::math` functions (`sin`, `log`, `exp`, …) delegate to the
 host's math library and MAY differ from another implementation in the last
 bits; the classification rules (NaN, infinity), rounding, and wrapping
 members are fixed by their chapters.
+
+### 5.8 Text and bytes
+
+Every `string` in the library is UTF-8 text, and the streams carry text
+only: the `std::io` readers and `std::fs::read` require valid UTF-8 and
+fail otherwise, while `std::net::sock_read` and `std::http` bodies decode
+lossily, replacing each invalid sequence with U+FFFD. Arbitrary content
+crosses the **file** boundary through `std::fs`'s byte twins —
+`readBytes`, `writeBytes`, `appendBytes` — whose unit is `List<u8>` and
+which never decode. `stringBytes` reaches the bytes *of a string*, but the
+language has neither a bytes-to-string nor an integer-to-`u8` conversion:
+bytes become text only when a text reader accepts them as valid UTF-8, and
+byte values come from text, from files, or from literals. A byte-level
+surface for the streams (`std::io`, `std::net`, `std::http`) is a roadmap
+candidate ([`../README.md`](../README.md) § 1.2).

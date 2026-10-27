@@ -46,11 +46,12 @@ The following are deliberately **not** specified here:
 | Package registry protocol, manifest format, tooling | xulo-website ecosystem documentation |
 
 **Self-hosting note (informative).** The standard library supplies the
-services a self-hosted tool needs — reading files, writing to standard error,
-reading arguments, choosing an exit status
-(`modules/fs.md`, `modules/io.md`, `modules/process.md`) — so a self-hosted
-implementation in Xulo reaches them here rather than through the foreign
-boundary of `ffi.md` in the language specification.
+services a self-hosted tool needs — reading and writing files in text and
+bytes, setting permission bits, writing to standard error, reading arguments,
+choosing an exit status (`modules/fs.md`, `modules/io.md`,
+`modules/process.md`) — so a self-hosted implementation in Xulo reaches them
+here rather than through the foreign boundary of `ffi.md` in the language
+specification.
 
 ### 1.2 Roadmap
 
@@ -67,7 +68,10 @@ implemented:
 | `std::net` UDP surface — `UdpSocket` | website `standard-library-net-fs` | not specified |
 | `std::http` extras — HTTPS/TLS, redirects, compression, keep-alive, streaming bodies, multipart forms, graceful shutdown | design direction (Go `net/http`, Rust `axum`) | not specified |
 | `std::fs` object surface — `File`, `Path`, `FileMode` | website `standard-library-net-fs` | not specified |
+| `std::fs` extras — `lstat`, link metadata | design direction (POSIX `lstat`) | not specified |
+| `std::fs` streaming walk — `walkIter` | design direction (Go `walkDir`, language iterators) | not specified |
 | `std::io` generic surface — `Read`/`Write` traits over streams, files, sockets | design direction (Rust `std::io`, Go `io.Reader`) | not specified |
+| `std::io` / `std::net` byte surface — byte-level stdin and socket reads | design direction (Rust `Vec<u8>`, Go `[]byte`) | not specified |
 | `std::math` extras — `Random`, `Matrix`, `Vector`, `Complex` | website `standard-library-net-fs` | not specified |
 | `std::time` extras — `Instant`, `Duration`, `DateTime` | website `standard-library-net-fs` | not specified |
 
@@ -183,7 +187,7 @@ Additional conventions:
 | [`modules/math.md`](modules/math.md) | `std::math` — constants, float and integer functions, random draws |
 | [`modules/time.md`](modules/time.md) | `std::time` — wall and monotonic clocks, sleep, ISO 8601 text, and date fields |
 | [`modules/io.md`](modules/io.md) | `std::io` — the process streams: writes, flush, reads, terminal probes |
-| [`modules/fs.md`](modules/fs.md) | `std::fs` — whole-file read/write/append, timestamps, exclusive creation, inspection, copy/rename, existence, removal, directories, tree walk, temporaries |
+| [`modules/fs.md`](modules/fs.md) | `std::fs` — whole-file read/write/append in text and bytes, timestamps, permission bits, exclusive creation, inspection, copy/rename, existence, removal, directories, tree walk, temporaries |
 | [`modules/path.md`](modules/path.md) | `std::path` — portable POSIX path string operations |
 | [`modules/os.md`](modules/os.md) | `std::os` — environment, working directory, host directories, process identity |
 | [`modules/net.md`](modules/net.md) | `std::net` — TCP sockets over opaque numeric handles |

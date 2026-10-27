@@ -1,17 +1,22 @@
 # `std::fs`
 
 `std::fs` holds the whole-file filesystem operations: read a file as one
-string, write, append, touch, or set the time of a file, create a file
-exclusively, probe existence, inspect, copy, and remove a file, create,
-list, walk, and remove a directory, rename a file or a directory, and make
-a temporary file or
-directory. Every path is a
-**host path string** — the module follows
-the host's path conventions (separator characters, case handling, the
-characters a path may contain), which makes it host-dependent (§ 5.5 of
-[`README.md`](README.md)); for portable POSIX path *string* semantics that
-give the same answer on every machine, see [`path.md`](path.md). Version 0.1
-has no open file handles and no incremental I/O.
+string or one list of bytes, write, append, touch, set its time or
+permission bits, create a file exclusively, probe existence, inspect, copy,
+and remove a file, create, list, walk, and remove a directory, rename a
+file or a directory, and make a temporary file or directory. Every path is
+a **host path string** — the module follows the host's path conventions
+(separator characters, case handling, the characters a path may contain),
+which makes it host-dependent (§ 5.5 of [`README.md`](README.md)); for
+portable POSIX path *string* semantics that give the same answer on every
+machine, see [`path.md`](path.md). Version 0.1 has no open file handles and
+no incremental I/O.
+
+Text is the default: every string here is UTF-8 and `read` refuses bytes
+that are not valid UTF-8. Content that is not text has its own members —
+`readBytes`, `writeBytes`, and `appendBytes` carry a `List<u8>` — so an
+object file or an image crosses this module as bytes, never as a decoded
+string (the shared convention is § 5.8 of [`README.md`](README.md)).
 
 The qualified path needs no import:
 
@@ -23,7 +28,7 @@ std::fs::read("./note.txt")             // ok: Result<string, Error>
 Import forms are the six of [`README.md`](README.md) § 2.2:
 
 ```xulo
-use std::fs::*;                         // the seventeen functions
+use std::fs::*;                         // the twenty-three functions
 use std::fs as fs;
 fs::exists("./note.txt")                // ok: an ordinary bool
 use std::fs::{read, write};
@@ -44,6 +49,8 @@ use std::fs::{read, write};
   - the file cannot be read (permissions, I/O error),
   - the path names a directory, and
   - the file's bytes are not valid UTF-8.
+- The byte twin is [`readBytes`](#byte-content): the same file and the same
+  path failures, with no decoding and so no encoding class.
 
 ```xulo
 match std::fs::read("./empty.txt") {
@@ -93,6 +100,39 @@ std::fs::write("./log.txt", "new")                           // ok — truncates
 ```xulo
 std::fs::write("./log.txt", "first\n")     // ok — the file holds "first\n"
 std::fs::append("./log.txt", "second\n")   // ok — it holds "first\nsecond\n"
+```
+
+## Byte content
+
+| Member | Signature | Meaning |
+|--------|-----------|---------|
+| `std::fs::readBytes` | `fn(path: string): Result<List<u8>, Error>` | the whole file as raw bytes |
+| `std::fs::writeBytes` | `fn(path: string, bytes: List<u8>): Result<unit, Error>` | create or truncate the file, then write `bytes` |
+| `std::fs::appendBytes` | `fn(path: string, bytes: List<u8>): Result<unit, Error>` | add `bytes` to the end of the file, creating it when absent |
+
+- The three are the byte twins of `read`, `write`, and `append`: the same
+  path rules and path failures, the same truncate-versus-grow behaviour.
+  The difference is the unit, and that nothing is decoded in either
+  direction, so every byte sequence survives the round trip.
+- `readBytes` yields one element per byte, each in `0 …= 255`; an empty
+  file is `Ok([])`. It has no encoding class of failure: any content is
+  `Ok`. Its `Err` classes are `read`'s other three — the path is absent,
+  names a directory, or cannot be read.
+- `writeBytes` truncates first and creates when absent; `appendBytes` keeps
+  what was there. Neither creates a missing parent, and both are `Err` on a
+  path that names a directory. An empty `bytes` writes nothing, exactly as
+  its text twin does with the empty string.
+- `stringBytes` yields the bytes of a string, but the language has neither a
+  bytes-to-string nor an integer-to-`u8` conversion: byte values come from
+  `stringBytes`, from `readBytes`, or from literals, and arithmetic on them
+  stays in `u8`. Bytes become text only when a text reader accepts them as
+  valid UTF-8. `copy` moves a whole file without decoding; these three are
+  for content the program inspects or produces itself.
+
+```xulo
+std::fs::writeBytes("./blob.bin", [0x7F, 0x45, 0x4C, 0x46])  // ok
+std::fs::readBytes("./blob.bin")            // runs: Ok([127, 69, 76, 70])
+std::fs::appendBytes("./blob.bin", [])      // ok — no bytes added
 ```
 
 ## Creating a file exclusively
@@ -190,6 +230,36 @@ match std::fs::stat("./note.txt") {
 }
 ```
 
+## Setting the permission bits
+
+| Member | Signature | Meaning |
+|--------|-----------|---------|
+| `std::fs::setMode` | `fn(path: string, mode: number): Result<unit, Error>` | set the entry's permission bits to `mode` |
+
+- `mode` is the low **12 bits** of a POSIX mode — the owner, group, and
+  other read/write/execute bits, `0o777` when only the familiar nine
+  matter. The domain is `0 …= 4095`; a fractional value counts as its
+  truncation toward zero, and a value outside the domain is `Err`, the
+  argument domain checked before the host is touched.
+- Only the bits change: content, size, and the modification time stay as
+  they were.
+- The entry is found as `stat` finds it, so a link is followed to what it
+  points at. A host without POSIX permission bits applies what it has and
+  synthesizes `stat.mode` in return; the mapping is the host's (§ 5.5 of
+  [`README.md`](README.md)).
+- Each of the following is `Err`:
+  - the path is empty,
+  - the path does not exist (including a broken symlink),
+  - the path names something `stat` does not know, and
+  - the call is refused (permissions, I/O error).
+- This is how a file this module wrote becomes runnable: `writeBytes` the
+  image, then `setMode(path, 0o755)`.
+
+```xulo
+std::fs::setMode("./tool", 0o755)          // ok — readable and executable
+std::fs::setMode("./tool", 4096)           // runs: Err — mode outside 0 …= 4095
+```
+
 ## Probing existence
 
 | Member | Signature | Meaning |
@@ -210,9 +280,9 @@ match std::fs::stat("./note.txt") {
 
 | Member | Signature | Meaning |
 |--------|-----------|---------|
-| `std::fs::stat` | `fn(path: string): Result<{ kind: string, size: number, modified: u64 }, Error>` | what the path is: its kind, its size, and its modification time |
+| `std::fs::stat` | `fn(path: string): Result<{ kind: string, size: number, modified: u64, mode: number }, Error>` | what the path is: its kind, its size, its modification time, and its permission bits |
 
-- The result is a structural object with three fields:
+- The result is a structural object with four fields:
   - `kind` — `"file"` or `"directory"`. Symlinks are followed, as `exists`
     follows them, so the answer names what the path resolves to, never
     `"symlink"`. Anything else a host may keep — a device, a socket, a
@@ -222,15 +292,20 @@ match std::fs::stat("./note.txt") {
   - `modified` — the last modification time in milliseconds since the Unix
     epoch, the same clock and unit as [`std::time::now`](time.md); a host
     whose clock reads before the epoch yields `0`, as `now` does.
-  The creation (birth) time is deliberately absent: many hosts and
-  filesystems record none, so it could only arrive as a nullable field —
-  it stays out of version 0.1 along with the other deferred `fs` members.
+  - `mode` — the permission bits, the low 12 bits of the host's POSIX mode,
+    the value [`setMode`](#setting-the-permission-bits) writes. A host
+    without POSIX permission bits synthesizes one (host-dependent, § 5.5 of
+    [`README.md`](README.md)).
 - Unlike `exists`, an unanswerable question is `Err` here: `stat` is asked
   for facts, and a probe that cannot be answered has no facts to give.
 - Each of the following is `Err`:
   - the path does not exist (including a broken symlink),
   - the path names something that is neither a file nor a directory, and
   - the path cannot be read (permissions, I/O error).
+
+The creation (birth) time is deliberately absent: many hosts and filesystems
+record none, so it could only arrive as a nullable field — it stays out of
+version 0.1 along with the other deferred `fs` members.
 
 ```xulo
 match std::fs::stat("./note.txt") {
@@ -251,8 +326,14 @@ match std::fs::stat("./note.txt") {
   replaces it; the previous content is gone. Its parent directory is **not**
   created: a missing parent is `Err`.
 - Copying is not atomic: a copy interrupted partway can leave a partial `to`.
-  A program that needs a whole-or-nothing result writes a temporary file and
-  `rename`s it into place.
+  A program that needs a whole-or-nothing result writes a temporary file in
+  the destination's directory
+  ([`tempFileIn`](#temporary-files-and-directories)) and `rename`s it into
+  place: a temporary under the host's temporary directory can sit on another
+  filesystem, where `rename` is `Err`.
+- The copy is a new entry with the host's default permission bits: a copied
+  executable is not executable until `setMode` says so, while `rename` keeps
+  the bits because it is the same entry.
 - Each of the following is `Err`:
   - `from` does not exist or names a directory,
   - `from` and `to` name the same path — a copy onto its source changes
@@ -310,8 +391,9 @@ std::fs::rename("./note.txt", "./note.txt")   // Err — no move
   `remove` of the same path is `Err` as well — success means the file is gone.
 - A directory path is `Err`: `remove` does not remove directories, empty or
   not; the member that deletes one — and its whole tree — is `removeDir`.
-- Symlink resolution and permission checks follow the host's filesystem;
-  this specification pins no cross-host behaviour for them.
+- The path names the entry itself: a symbolic link is removed as a link,
+  and what it points at is left untouched. Permission checks follow the
+  host's filesystem.
 
 ## Creating directories
 
@@ -411,9 +493,12 @@ match std::fs::walk("./src") {
 - A path that names a file is `Err`: `removeDir` removes directories; the
   file member is `remove`.
 - The empty path names nothing and is `Err`.
-- Like every member here, symlink resolution and permission checks follow
-  the host's filesystem; this specification pins no cross-host behaviour for
-  them.
+- A symbolic link at `path` is not a directory and is `Err`: removal names
+  the entry, not what it points at, and the target is never deleted. Remove
+  the link itself with `remove`.
+- A link met inside the tree is removed as a link, never descended into, so
+  a link pointing outside the tree cannot widen the removal.
+- Permission checks follow the host's filesystem.
 
 ```xulo
 std::fs::mkdir("./scratch/tmp")        // ok — the chain exists
@@ -427,6 +512,8 @@ std::fs::exists("./scratch")           // runs: false
 |--------|-----------|---------|
 | `std::fs::tempFile` | `fn(prefix: string? = null): Result<string, Error>` | create a unique empty file in the host's temporary directory; yield its path |
 | `std::fs::tempDir` | `fn(prefix: string? = null): Result<string, Error>` | create a unique empty directory in the host's temporary directory; yield its path |
+| `std::fs::tempFileIn` | `fn(dir: string, prefix: string? = null): Result<string, Error>` | create a unique empty file in `dir`; yield its path |
+| `std::fs::tempDirIn` | `fn(dir: string, prefix: string? = null): Result<string, Error>` | create a unique empty directory in `dir`; yield its path |
 
 - The path is the product: `Ok` yields where a brand-new entry already
   lives. Which directory the host keeps temporaries in is host-dependent
@@ -448,6 +535,13 @@ std::fs::exists("./scratch")           // runs: false
   behind.
 - `Err` when the host's temporary directory cannot be created in — absent,
   unwritable, no permission.
+- The `…In` pair carries the same guarantees — unique, exclusively created,
+  empty, never cleaned up — with the directory chosen by the caller instead
+  of the host. `dir` must already exist and be a directory (`mkdir` makes
+  it); a missing, unwritable, or non-directory `dir` is `Err`.
+- Their reason to exist is the rename story: a temporary made beside its
+  destination shares the destination's filesystem, so
+  `rename` into place cannot cross a mount.
 
 ```xulo
 match std::fs::tempFile("upload_") {
@@ -496,7 +590,7 @@ under the host's conventions.
 
 | Kind | Members |
 |------|---------|
-| Fallible (`Result`) | `read` `write` `append` `createNew` `touch` `setTimes` `stat` `copy` `rename` `remove` `mkdir` `readDir` `walk` `removeDir` `tempFile` `tempDir` |
+| Fallible (`Result`) | `read` `readBytes` `write` `writeBytes` `append` `appendBytes` `createNew` `touch` `setTimes` `setMode` `stat` `copy` `rename` `remove` `mkdir` `readDir` `walk` `removeDir` `tempFile` `tempFileIn` `tempDir` `tempDirIn` |
 | Total | `exists` |
 | Absence (`null`) | none — `read` of an empty file is `Ok("")`, not `null` |
 | Runtime failure | none — no `std::fs` member has a runtime-failure argument domain |
@@ -516,7 +610,7 @@ std::fs::append("a.txt", "hi")            // ok — a.txt now holds "hihi"
 std::fs::createNew("b.txt", "hi")         // ok — "b.txt" did not exist
 std::fs::touch("b.txt")                  // ok — content kept, stamp refreshed
 std::fs::setTimes("b.txt", 0)            // ok — stamped at the Unix epoch
-std::fs::stat("a.txt")                    // ok: Result<{ kind, size, modified }, Error>
+std::fs::stat("a.txt")                    // ok: Result<{ kind, size, modified, mode }, Error>
 std::fs::copy("a.txt", "c.txt")           // ok
 std::fs::rename("c.txt", "d.txt")         // ok
 std::fs::readDir(".")                     // ok: Result<List<string>, Error>
@@ -524,6 +618,12 @@ std::fs::walk(".")                        // ok: Result<List<string>, Error> —
 std::fs::removeDir("./scratch")           // ok
 std::fs::tempFile("upload_")              // ok: Result<string, Error> — a path that did not exist
 std::fs::tempDir()                        // ok: Result<string, Error> — an empty directory
+std::fs::tempFileIn("./build", "obj_")    // ok: Result<string, Error> — in ./build
+std::fs::readBytes("a.txt")               // ok: Result<List<u8>, Error> — no decoding
+std::fs::writeBytes("blob.bin", [0x7F, 0x45, 0x4C, 0x46])  // ok
+std::fs::appendBytes("blob.bin", [])      // ok — no bytes to add
+std::fs::setMode("blob.bin", 0o755)       // ok — executable bits on
+std::fs::setMode("blob.bin", 4096)        // runs: Err — mode outside 0 …= 4095
 std::fs::read(42)                         // error[E0202]: expected `string`, found `int`
 std::fs::write("a.txt")                   // error[E0207]: expected 2 arguments, found 1
 std::fs::scan(".")                        // error[E0601]: no member `scan`
