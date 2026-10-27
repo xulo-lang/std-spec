@@ -21,9 +21,9 @@ common. Each member's meaning is specified in its own module chapter.
 | `std::math` | mathematical constants; float and integer functions; random draws | [`math.md`](math.md) |
 | `std::time` | wall and monotonic clocks; sleep; ISO 8601 text and calendar fields | [`time.md`](time.md) |
 | `std::io` | the process streams: writes, flush, reads, terminal probes | [`io.md`](io.md) |
-| `std::fs` | whole-file read/write/append in text and bytes; timestamps; permission bits; exclusive creation; inspection; copy and rename; existence; removal; directories and tree walk; temporaries | [`fs.md`](fs.md) |
+| `std::fs` | whole-file read/write/append in text and bytes; timestamps; permission bits; exclusive creation; inspection; path resolution; copy and rename; existence; removal; directories and tree walk; temporaries | [`fs.md`](fs.md) |
 | `std::path` | portable POSIX path string operations | [`path.md`](path.md) |
-| `std::os` | environment; working directory; host directories; process identity | [`os.md`](os.md) |
+| `std::os` | environment; working directory; host directories; process identity; executable path | [`os.md`](os.md) |
 | `std::net` | TCP sockets over opaque numeric handles | [`net.md`](net.md) |
 | `std::http` | HTTP/1.1 client and server over the TCP primitives | [`http.md`](http.md) |
 | `std::process` | exit status; argv; child capture; command building and child handles | [`process.md`](process.md) |
@@ -146,9 +146,9 @@ of names its glob binds — coincides with the exports for ten modules, and
 | `std::math` | `PI` `E` `TAU` `INFINITY` `NAN` | `abs` `min` `max` `sign` `sqrt` `cbrt` `pow` `hypot` `clamp` `floor` `ceil` `round` `trunc` `toFixed` `sin` `cos` `tan` `asin` `acos` `atan` `atan2` `log` `log2` `log10` `log1p` `exp` `expm1` `random` `randomInt` `wrappingAdd` `wrappingSub` `wrappingMul` `popCount` `countLeadingZeros` `countTrailingZeros` `rotateLeft` `rotateRight` | — |
 | `std::time` | — | `now` `nowNanos` `monotonic` `monotonicNanos` `sleep` `format` `parse` `parts` `fromParts` `weekday` | — |
 | `std::io` | — | `print` `println` `eprint` `eprintln` `flush` `readLine` `read` `readN` `stdinIsTTY` `stdoutIsTTY` | — |
-| `std::fs` | — | `read` `readBytes` `write` `writeBytes` `append` `appendBytes` `createNew` `touch` `setTimes` `setMode` `exists` `stat` `copy` `rename` `remove` `mkdir` `readDir` `walk` `removeDir` `tempFile` `tempFileIn` `tempDir` `tempDirIn` | — |
+| `std::fs` | — | `read` `readBytes` `write` `writeBytes` `append` `appendBytes` `createNew` `touch` `setTimes` `setMode` `exists` `realpath` `stat` `copy` `rename` `remove` `mkdir` `readDir` `walk` `removeDir` `tempFile` `tempFileIn` `tempDir` `tempDirIn` | — |
 | `std::path` | — | `isAbsolute` `join` `dirname` `basename` `split` `ext` `stem` `withExt` `normalize` `relative` | — |
-| `std::os` | — | `getenv` `setenv` `cwd` `chdir` `tmpDir` `homeDir` `pid` `platform` `arch` `hostName` `userName` `cpuCount` | — |
+| `std::os` | — | `getenv` `setenv` `unsetenv` `cwd` `chdir` `tmpDir` `homeDir` `pid` `platform` `arch` `hostName` `userName` `execPath` `cpuCount` | — |
 | `std::net` | — | `tcp_listen` `tcp_accept` `tcp_connect` `sock_read` `sock_write` `sock_shutdown` `sock_shutdown_write` `sock_close` `sock_local_addr` `sock_peer_addr` | — |
 | `std::http` | — | `fetch` `request` `listen` | `Request` `Response` `Server` |
 | `std::process` | — | `exit` `args` `run` `exec` `launch` | `Command` `Child` |

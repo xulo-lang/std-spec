@@ -9,8 +9,8 @@ variables exist, which directory is current or temporary, and which strings
 `platform`/`arch` yield depend on the host
 ([`README.md`](README.md) § 5.5).
 
-The module's face is twelve functions and nothing else: no constants and no
-types ([`README.md`](README.md) § 3). The qualified path needs no import:
+The module's face is fourteen functions and nothing else: no constants and
+no types ([`README.md`](README.md) § 3). The qualified path needs no import:
 
 ```xulo
 std::os::cwd()                    // ok: Result<string, Error>
@@ -20,7 +20,7 @@ print(std::os::platform())        // runs: e.g. "linux" on this host
 Import forms are the six of [`README.md`](README.md) § 2.2:
 
 ```xulo
-use std::os::*;                   // the twelve functions
+use std::os::*;                   // the fourteen functions
 use std::os as os;
 os::pid()                         // ok: same member, aliased
 use std::os::{getenv, setenv};
@@ -32,6 +32,7 @@ use std::os::{getenv, setenv};
 |--------|-----------|---------|
 | `std::os::getenv` | `fn(name: string): Result<string?, Error>` | the value of an environment variable |
 | `std::os::setenv` | `fn(name: string, value: string): Result<unit, Error>` | set a variable for this process |
+| `std::os::unsetenv` | `fn(name: string): Result<unit, Error>` | remove a variable from this process's environment |
 
 - `getenv` distinguishes three cases. A variable that is set yields
   `Ok(value)`. A variable that is unset yields `Ok(null)` — **absence**, the
@@ -44,8 +45,13 @@ use std::os::{getenv, setenv};
   name or value containing a NUL byte; any other name/value pair is set for
   this process and the call yields `Ok`. A rejected `setenv` changes
   nothing: a subsequent `getenv` of the same name sees the prior state.
-- The change is process-wide: a later `getenv` of the same name observes it,
-  and so does a child process spawned afterwards
+- `unsetenv` removes the variable: a later `getenv` of the name is
+  `Ok(null)`, and a child started afterwards does not see it. Removing a
+  name that is not set is `Ok` and changes nothing — removal is idempotent.
+  It fails with `Err` for the three name classes `setenv` also rejects —
+  empty, containing `=`, containing a NUL byte — and for nothing else.
+- A set or a removal is process-wide: a later `getenv` of the same name
+  observes it, and so does a child process spawned afterwards
   ([`process.md`](process.md)). Xulo tasks are cooperative on one OS thread,
   so no concurrent reader observes a torn environment.
 - A test that asserts an environment value must set it first: an unset
@@ -132,6 +138,7 @@ match std::os::homeDir() {
 | `std::os::arch` | `fn(): string` | the CPU architecture |
 | `std::os::hostName` | `fn(): Result<string, Error>` | the machine's name |
 | `std::os::userName` | `fn(): Result<string, Error>` | the user the process runs as |
+| `std::os::execPath` | `fn(): Result<string, Error>` | the executable the host started for this process |
 | `std::os::cpuCount` | `fn(): number` | the logical processors available to the process |
 
 - `pid`, `platform`, `arch`, and `cpuCount` are total: every process has an
@@ -151,6 +158,14 @@ match std::os::homeDir() {
   compares or prints them, never parses them. `cpuCount` is a capacity, not
   a reservation — a program sizes work with it and does not assume the
   processors stay idle for it.
+- `execPath` names where the program lives: an absolute path with symbolic
+  links resolved, as [`std::fs::realpath`](fs.md#resolving-a-path) resolves
+  them, so it names the executable file itself — for a compiled program the
+  program, for one run by an interpreter the interpreter. It is how a tool
+  finds files shipped beside itself — its standard library, resources —
+  where `args()[0]` only repeats what the caller typed. A host that will
+  not report the executable yields `Err`; the answer is fixed at process
+  start.
 
 ```xulo
 print(std::os::pid())              // runs: the process id, e.g. 12345
@@ -168,12 +183,12 @@ match std::os::hostName() {
 
 | Kind | Members |
 |------|---------|
-| Fallible (`Result`) | `getenv` (value not valid UTF-8); `setenv` (empty name, `=` in name, NUL in name or value); `cwd` (host error); `chdir` (path not enterable); `homeDir` (variable unset, empty, or unreadable); `hostName`, `userName` (host error) |
+| Fallible (`Result`) | `getenv` (value not valid UTF-8); `setenv` (empty name, `=` in name, NUL in name or value); `unsetenv` (empty name, `=` in name, NUL in name); `cwd` (host error); `chdir` (path not enterable); `homeDir` (variable unset, empty, or unreadable); `hostName`, `userName` (host error); `execPath` (host will not report the executable) |
 | Total | `pid`, `platform`, `arch`, `tmpDir`, `cpuCount` |
 | Absence | `getenv` → `Ok(null)` when the variable is unset — the `std::os` row of [`README.md`](README.md) § 5.2 |
 | Runtime failure | none |
 
-No `std::os` member stops the program on the program's own inputs: the seven
+No `std::os` member stops the program on the program's own inputs: the nine
 fallible members answer every bad name, unreadable value, and unenterable
 path with `Err`, and the five total ones answer every call.
 
@@ -182,16 +197,19 @@ path with `Err`, and the five total ones answer every call.
 ```xulo
 std::os::getenv("HOME")           // ok: Result<string?, Error>
 std::os::setenv("A", "1")         // ok
+std::os::unsetenv("A")            // ok — and now `getenv("A")` is Ok(null)
 std::os::pid()                    // ok: number
 std::os::platform()               // ok: string
 std::os::chdir("/tmp")            // ok
 std::os::tmpDir()                 // ok: string
 std::os::homeDir()                // ok: Result<string, Error>
+std::os::execPath()               // ok: Result<string, Error> — where this program lives
 std::os::cpuCount()               // ok: number — at least 1
 std::os::getenv()                 // error[E0207]: expected 1 argument, found 0
 std::os::setenv(1, "x")           // error[E0202]: expected `string`, found `int`
 std::os::chdir(true)              // error[E0202]: expected `string`, found `bool`
 std::os::arch("x")                // error[E0207]: expected 0 arguments, found 1
+std::os::execPath(0)              // error[E0207]: expected 0 arguments, found 1
 Os::cwd()                         // error[E0607]: `Os` lives under `std`: use `std::os::cwd`
 std::os::environ()                // error[E0601]: no member `environ`
 ```

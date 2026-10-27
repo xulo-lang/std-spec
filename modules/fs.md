@@ -2,15 +2,15 @@
 
 `std::fs` holds the whole-file filesystem operations: read a file as one
 string or one list of bytes, write, append, touch, set its time or
-permission bits, create a file exclusively, probe existence, inspect, copy,
-and remove a file, create, list, walk, and remove a directory, rename a
-file or a directory, and make a temporary file or directory. Every path is
-a **host path string** — the module follows the host's path conventions
-(separator characters, case handling, the characters a path may contain),
-which makes it host-dependent (§ 5.5 of [`README.md`](README.md)); for
-portable POSIX path *string* semantics that give the same answer on every
-machine, see [`path.md`](path.md). Version 0.1 has no open file handles and
-no incremental I/O.
+permission bits, create a file exclusively, probe existence, resolve,
+inspect, copy, and remove a file, create, list, walk, and remove a
+directory, rename a file or a directory, and make a temporary file or
+directory. Every path is a **host path string** — the module follows the
+host's path conventions (separator characters, case handling, the
+characters a path may contain), which makes it host-dependent (§ 5.5 of
+[`README.md`](README.md)); for portable POSIX path *string* semantics that
+give the same answer on every machine, see [`path.md`](path.md). Version
+0.1 has no open file handles and no incremental I/O.
 
 Text is the default: every string here is UTF-8 and `read` refuses bytes
 that are not valid UTF-8. Content that is not text has its own members —
@@ -28,7 +28,7 @@ std::fs::read("./note.txt")             // ok: Result<string, Error>
 Import forms are the six of [`README.md`](README.md) § 2.2:
 
 ```xulo
-use std::fs::*;                         // the twenty-three functions
+use std::fs::*;                         // the twenty-four functions
 use std::fs as fs;
 fs::exists("./note.txt")                // ok: an ordinary bool
 use std::fs::{read, write};
@@ -275,6 +275,41 @@ std::fs::setMode("./tool", 4096)           // runs: Err — mode outside 0 …= 
   directory, path syntax the host rejects — reads as **`false`**, not as a
   failure: an unanswerable question counts as "not there".
 - Absent path → `false`; present file or directory → `true`.
+
+## Resolving a path
+
+| Member | Signature | Meaning |
+|--------|-----------|---------|
+| `std::fs::realpath` | `fn(path: string): Result<string, Error>` | the absolute, link-free path naming what `path` names |
+
+- `realpath` answers *where* a path leads: the result is absolute, spelled
+  with the host's separator and case rules (§ 5.5 of
+  [`README.md`](README.md)), with `.` and `..` components and duplicate
+  separators gone and every symbolic link resolved. Naming the result again
+  resolves to itself.
+- Unlike `path::normalize`, which is pure string arithmetic on POSIX
+  spellings ([`path.md`](path.md)), `realpath` asks the host: links are
+  read, and the working directory supplies the base for a relative path.
+- The path must name something: a missing component, a broken link, or a
+  component that cannot be entered is `Err`. A link anywhere in the path —
+  the last component included — is followed, so the result names the
+  target, never the link.
+- Spellings that differ only by `.`, `..`, duplicate separators, or links
+  yield the same result, which is how a program deduplicates paths. A
+  case-insensitive host may keep the case it stores, so string identity
+  follows the host's rules, not a portable one.
+- Each of the following is `Err`:
+  - the path is empty,
+  - a component does not exist (a broken link included), and
+  - a component cannot be read (permissions, I/O error).
+- `exists`, `realpath`, and `stat` divide the questions: `exists` says
+  whether, `realpath` says where, and `stat` says what.
+
+```xulo
+std::fs::realpath("./src/../src/main.x")   // ok: an absolute path with no "." or ".."
+std::fs::realpath("./nope")                // runs: Err — nothing to resolve
+std::fs::realpath("./link-to-src")         // ok: the directory's own path — the link is gone
+```
 
 ## Inspecting a file
 
@@ -590,7 +625,7 @@ under the host's conventions.
 
 | Kind | Members |
 |------|---------|
-| Fallible (`Result`) | `read` `readBytes` `write` `writeBytes` `append` `appendBytes` `createNew` `touch` `setTimes` `setMode` `stat` `copy` `rename` `remove` `mkdir` `readDir` `walk` `removeDir` `tempFile` `tempFileIn` `tempDir` `tempDirIn` |
+| Fallible (`Result`) | `read` `readBytes` `write` `writeBytes` `append` `appendBytes` `createNew` `touch` `setTimes` `setMode` `realpath` `stat` `copy` `rename` `remove` `mkdir` `readDir` `walk` `removeDir` `tempFile` `tempFileIn` `tempDir` `tempDirIn` |
 | Total | `exists` |
 | Absence (`null`) | none — `read` of an empty file is `Ok("")`, not `null` |
 | Runtime failure | none — no `std::fs` member has a runtime-failure argument domain |
@@ -610,6 +645,7 @@ std::fs::append("a.txt", "hi")            // ok — a.txt now holds "hihi"
 std::fs::createNew("b.txt", "hi")         // ok — "b.txt" did not exist
 std::fs::touch("b.txt")                  // ok — content kept, stamp refreshed
 std::fs::setTimes("b.txt", 0)            // ok — stamped at the Unix epoch
+std::fs::realpath("./a.txt")              // ok: Result<string, Error> — absolute and link-free
 std::fs::stat("a.txt")                    // ok: Result<{ kind, size, modified, mode }, Error>
 std::fs::copy("a.txt", "c.txt")           // ok
 std::fs::rename("c.txt", "d.txt")         // ok

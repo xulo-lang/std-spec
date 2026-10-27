@@ -41,6 +41,7 @@ returns no value at all.
 | `eprint` | `fn(text: string): Result<unit, Error>` | `std::io` |
 | `eprintln` | `fn(text: string): Result<unit, Error>` | `std::io` |
 | `exec` | `fn(program: string, args: List<string>, input: string? = null, timeout: u64? = null): Result<{ stdout: string, stderr: string, code: number }, Error>` | `std::process` |
+| `execPath` | `fn(): Result<string, Error>` | `std::os` |
 | `exists` | `fn(path: string): bool` | `std::fs` |
 | `exit` | `fn(code: number): never` | `std::process` |
 | `exp` | `fn(x: float): float` | `std::math` |
@@ -91,6 +92,7 @@ returns no value at all.
 | `readDir` | `fn(path: string): Result<List<string>, Error>` | `std::fs` |
 | `readLine` | `fn(): Result<string?, Error>` | `std::io` |
 | `readN` | `fn(max: number): Result<string?, Error>` | `std::io` |
+| `realpath` | `fn(path: string): Result<string, Error>` | `std::fs` |
 | `RegexError` | type `{ message: string }`; constructed only by `RegExp::compile`'s `Err` | `std::regex` |
 | `RegexMatch` | type `{ value: string, index: int, end: int }` with `fn group(ref: number \| string): string?` | `std::regex` |
 | `RegExp` | type; static `fn compile(pattern: string, flags: string?): Result<RegExp, RegexError>`; methods `fn test(input: string): bool`, `fn find(input: string): RegexMatch?`, `fn find_all(input: string): List<RegexMatch>` | `std::regex` |
@@ -141,6 +143,7 @@ returns no value at all.
 | `toFixed` | `fn(x: float, digits: int): string` | `std::math` |
 | `touch` | `fn(path: string): Result<unit, Error>` | `std::fs` |
 | `trunc` | `fn(x: float): int` | `std::math` |
+| `unsetenv` | `fn(name: string): Result<unit, Error>` | `std::os` |
 | `userName` | `fn(): Result<string, Error>` | `std::os` |
 | `valid` | `fn(text: string): bool` | `std::json` |
 | `walk` | `fn(path: string): Result<List<string>, Error>` | `std::fs` |

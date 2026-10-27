@@ -187,9 +187,9 @@ Additional conventions:
 | [`modules/math.md`](modules/math.md) | `std::math` — constants, float and integer functions, random draws |
 | [`modules/time.md`](modules/time.md) | `std::time` — wall and monotonic clocks, sleep, ISO 8601 text, and date fields |
 | [`modules/io.md`](modules/io.md) | `std::io` — the process streams: writes, flush, reads, terminal probes |
-| [`modules/fs.md`](modules/fs.md) | `std::fs` — whole-file read/write/append in text and bytes, timestamps, permission bits, exclusive creation, inspection, copy/rename, existence, removal, directories, tree walk, temporaries |
+| [`modules/fs.md`](modules/fs.md) | `std::fs` — whole-file read/write/append in text and bytes, timestamps, permission bits, exclusive creation, inspection, path resolution, copy/rename, existence, removal, directories, tree walk, temporaries |
 | [`modules/path.md`](modules/path.md) | `std::path` — portable POSIX path string operations |
-| [`modules/os.md`](modules/os.md) | `std::os` — environment, working directory, host directories, process identity |
+| [`modules/os.md`](modules/os.md) | `std::os` — environment, working directory, host directories, process identity, executable path |
 | [`modules/net.md`](modules/net.md) | `std::net` — TCP sockets over opaque numeric handles |
 | [`modules/http.md`](modules/http.md) | `std::http` — HTTP/1.1 client and server over the TCP primitives |
 | [`modules/process.md`](modules/process.md) | `std::process` — exit status, argv, child capture, command building, child handles |
