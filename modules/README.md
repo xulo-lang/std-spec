@@ -263,6 +263,18 @@ match std::fs::write("./a.txt", "hello std") {
 ([`../README.md`](../README.md) § 3.5): the contract is the `Err` shape and
 the failure *classes* a chapter enumerates.
 
+Failure classes say what an `Err` may mean, not what a caller can detect:
+a member returning `Result<T, Error>` gives every `Err` the same shape, and
+message text is never a discriminator — a program or test MUST NOT recover
+a class by matching it ([`../README.md`](../README.md) § 3.5, rule 5). A
+caller branches only on what a member offers as data: a `code`, an absence
+(`Ok(null)`), a probe such as `exists`/`stat`, or a byte twin such as
+`readBytes`. A member that must let callers recover a class carries a
+domain error type in the `E` slot instead; that is a deliberate cost,
+because `?` requires the enclosing function's `E` to match and the value
+then does not compose with `Result<_, Error>`
+([`xulo-spec/error-handling.md`](../xulo-spec/error-handling.md)).
+
 ### 5.2 Absence is `null`
 
 A member whose result may simply *not exist* — end of stream, an unset

@@ -81,11 +81,11 @@ use std::net::{sock_read, sock_write};
 - The handle a timed-out call was given stays open and usable —
   `tcp_accept` may be tried again on the same listener, `sock_read` again
   on the same stream.
-- A program that polls with a budget tells an expired budget from the other
-  `Err` classes only by the message it receives: version 0.1 has no
-  structured error kind ([`README.md`](README.md) § 5.1), so the shape of
-  every `Err` is the same. The distinction costs nothing at the call site
-  when a budget only exists to stop a hang.
+- A program that polls with a budget cannot tell an expired budget from
+  the other `Err` classes: version 0.1 has no structured error kind, every
+  `Err` has the same shape, and message text is not a discriminator
+  ([`README.md`](README.md) § 5.1). The distinction costs nothing at the
+  call site when a budget only exists to stop a hang.
 - What a timed-out call did is defined by the call: nothing is consumed by
   `sock_read`, no handle is issued by `tcp_connect`, and only `sock_write`
   can leave a prefix handed to the host (see [Writing](#writing)).

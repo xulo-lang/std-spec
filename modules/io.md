@@ -115,6 +115,20 @@ if std::io::stdoutIsTTY() {
 }
 ```
 
+## Text, not bytes
+
+- Every reader here decodes **strict UTF-8**: bytes that are not valid text
+  are an `Err`, never a replacement character, and `readN` stops at a
+  character boundary. Stdin is a text stream in version 0.1 — this module
+  has no byte reader.
+- Binary input arrives as a **file**, through
+  [`std::fs::readBytes`](fs.md#byte-content); a byte-level surface for the
+  streams (`std::io`, `std::net`) is a roadmap candidate
+  ([`README.md`](README.md) § 5.8 and [`../README.md`](../README.md) § 1.2).
+- A program handed an object file on stdin never receives mojibake: it
+  fails cleanly at the first invalid byte, and the `message` names the
+  offset. Reading the bytes themselves is `readBytes`, on a path.
+
 ## Line reading
 
 | Member | Signature | Meaning |
