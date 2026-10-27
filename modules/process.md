@@ -88,7 +88,7 @@ std::process::exit(256 + 1)        // runs: on Unix, terminates with status 1 â€
 
 ```xulo
 let argv = std::process::args()   // ok: List<string> â€” argv[0] is the program path
-let n = argv.length                // ok: at least 1; the exact vector is host-dependent
+let n = listSize(argv)            // ok: at least 1; the exact vector is host-dependent
 ```
 
 ## Child capture

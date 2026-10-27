@@ -56,16 +56,16 @@ specification.
 **Self-hosting the library itself (informative).** The note above is about the
 compiler. Writing `std` in Xulo — the deferred file-handle and streaming-body
 surface, the byte-level `std::net` and `std::http` bodies — is a further step,
-and it is not a language change. It needs a **native platform layer**: an
-implementation-registered package, resolved the way `std` is today, whose
-members move bytes between Xulo and the host — `open`, `readInto`, `write`,
-`close`, and their socket twins, over `List<u8>` buffers and opaque `number`
-handles. User-level FFI cannot serve: `Ptr` is never dereferenced and never
-converts to or from an integer ([`ffi.md`](xulo-spec/ffi.md) § Ptr), and
-strings, lists, and buffers are outside its boundary (§ Not in scope).
-Exposing the same primitives as prelude intrinsics would be a language change;
-the hidden package is implementation work and keeps the Xulo code above it
-portable.
+and the platform layer it needs is not a language change. It needs a
+**native platform layer**: an implementation-registered package, resolved the
+way `std` is today, whose members move bytes between Xulo and the host —
+`open`, `readInto`, `write`, `close`, and their socket twins, over `List<u8>`
+buffers and opaque `number` handles. User-level FFI cannot serve: `Ptr` is
+never dereferenced and never converts to or from an integer
+([`ffi.md`](xulo-spec/ffi.md) § Ptr), and strings, lists, and buffers are
+outside its boundary (§ Not in scope). Exposing the same primitives as
+prelude intrinsics would be a language change; the hidden package is
+implementation work and keeps the Xulo code above it portable.
 
 ### 1.2 Roadmap
 
@@ -94,7 +94,7 @@ implemented:
 
 This specification is written for the world the implementation already
 implements (xulo-lang/xulo @ `08f6556`, including commit `238ff42`, *Math/Time
-moved into the std tree*). Four language changes must land in
+moved into the std tree*). Five language changes must land in
 [xulo-lang/spec](https://github.com/xulo-lang/spec) to make the two documents
 consistent; until they do, this specification governs the eleven modules and the
 language specification governs everything in § 1.1's first row.
@@ -121,6 +121,14 @@ language specification governs everything in § 1.1's first row.
    is an ordinary expression statement; the language's `E0218` row admits
    only excepted control-flow constructs and discarded `send` tasks, so that
    row must admit a never-returning call when `std::process` lands.
+5. **Structural record types.** `std` signatures return and accept
+   `{ f: T, … }` — the process capture record, `stat`, `path.split`, HTTP
+   headers — and `concurrency.md` uses the same form for a service handle.
+   The authoritative grammar has no production for it (`FieldType` is
+   undefined in [`grammar.md`](xulo-spec/grammar.md)), no chapter specifies
+   construction, field access, or assignability, and there is no record
+   literal. Either the form is specified — grammar, semantics, and a literal
+   — or these std members must name nominal `struct`s instead.
 
 **Convergence items** (contract here vs. the reference implementation today —
 work for the compiler, not for this document):

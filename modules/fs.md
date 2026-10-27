@@ -467,7 +467,7 @@ std::fs::rename("./note.txt", "./note.txt")   // Err — no move
 
 ```xulo
 match std::fs::readDir("./src") {
-  Result::Ok(names) => print(names.length)   // runs: 2
+  Result::Ok(names) => print(listSize(names))   // runs: 2
   Result::Err(e) => print(e.message)
 }
 ```
@@ -507,7 +507,7 @@ match std::fs::readDir("./src") {
 
 ```xulo
 match std::fs::walk("./src") {
-  Result::Ok(paths) => print(paths.length)   // runs: 3
+  Result::Ok(paths) => print(listSize(paths))   // runs: 3
   Result::Err(e) => print(e.message)
 }
 ```
