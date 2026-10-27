@@ -66,7 +66,8 @@ implemented:
 | `std::collections` — `HashMap`, `BTreeMap`, `HashSet`, `Deque` | website `standard-library-net-fs` | not specified |
 | `std::async` / `std::sync` / `std::thread` — intervals, channels, atomics, barriers | website `standard-library-net-fs` | not specified |
 | `std::net` UDP surface — `UdpSocket` | website `standard-library-net-fs` | not specified |
-| `std::http` extras — HTTPS/TLS, redirects, compression, keep-alive, streaming bodies, multipart forms, graceful shutdown | design direction (Go `net/http`, Rust `axum`) | not specified |
+| `std::http` extras — HTTPS/TLS, redirects, compression, keep-alive, multipart forms, graceful shutdown | design direction (Go `net/http`, Rust `axum`) | not specified |
+| `std::http` byte-faithful bodies — binary download/upload, file transfer, streaming bodies (language buffer primitives + `std::fs` handles + `std::net` bytes) | design direction (Go `io.Copy`, Node streams) | not specified |
 | `std::fs` object surface — `File`, `Path`, `FileMode` | website `standard-library-net-fs` | not specified |
 | `std::fs` extras — `lstat`, link metadata | design direction (POSIX `lstat`) | not specified |
 | `std::fs` streaming walk — `walkIter` | design direction (Go `walkDir`, language iterators) | not specified |
@@ -79,7 +80,7 @@ implemented:
 
 This specification is written for the world the implementation already
 implements (xulo-lang/xulo @ `08f6556`, including commit `238ff42`, *Math/Time
-moved into the std tree*). Three language changes must land in
+moved into the std tree*). Four language changes must land in
 [xulo-lang/spec](https://github.com/xulo-lang/spec) to make the two documents
 consistent; until they do, this specification governs the eleven modules and the
 language specification governs everything in § 1.1's first row.
@@ -106,6 +107,20 @@ language specification governs everything in § 1.1's first row.
    is an ordinary expression statement; the language's `E0218` row admits
    only excepted control-flow constructs and discarded `send` tasks, so that
    row must admit a never-returning call when `std::process` lands.
+
+**Deferred: a platform layer for a Xulo-implemented std.** The chapters above
+specify contracts, not implementations; today the host supplies them. Writing
+the library itself in Xulo — the deferred file-handle surface and streaming
+bodies, the byte-level `std::net` and `std::http` bodies — needs a primitive
+that moves bytes between Xulo and the host: an opaque handle plus a read/write
+over `List<u8>` buffers, or the borrowed `Slice<u8>` and pinning that
+[`ffi.md`](xulo-spec/ffi.md) defers. `Ptr` alone cannot serve: it is never
+dereferenced, it never converts to or from an integer, and strings, lists,
+and buffers are outside the foreign boundary ([`ffi.md`](xulo-spec/ffi.md),
+§ Ptr and § Not in scope). This is a language-spec dependency, recorded here
+so the std roadmap shows it; it is not needed for this specification's
+consistency and does not block self-hosting the compiler, which uses these
+contracts as they are.
 
 **Convergence items** (contract here vs. the reference implementation today —
 work for the compiler, not for this document):

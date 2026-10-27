@@ -49,6 +49,29 @@ use std::http::{Request, Response, Server};
   lookup is case-insensitive, query and form lookup are exact, the first
   match wins, and all three report absence as `null`.
 
+## Text bodies, not files
+
+- A body is text in both directions: `Response.body` and `request`'s `body`
+  are strings, and a received body is decoded lossily as UTF-8, exactly as
+  [`net.md`](net.md)'s `sock_read` decodes it. Bytes that are not valid text
+  become U+FFFD; they never arrive as an `Err`.
+- There is therefore **no byte-faithful download or upload** in version 0.1:
+  fetching an image or an archive yields replacement characters, and
+  `request` cannot send one; a binary file is not even readable through
+  [`std::fs::read`](fs.md), which refuses non-UTF-8.
+- Text moves, and composes with the filesystem: `fetch` plus
+  [`std::fs::write`](fs.md) downloads a text file,
+  [`std::fs::read`](fs.md) plus `request` uploads one. The response body cap
+  is **16 MiB**, and the server accepts a request body of at most **16 MiB**
+  ([Client](#client), [Server](#server)).
+- This module is a text HTTP client and server, not a static file server.
+  A file-body surface — byte-faithful bodies, file transfer, streaming — is
+  a roadmap candidate ([`../README.md`](../README.md) § 1.2): it needs file
+  handles and incremental I/O in [`std::fs`](fs.md) and a byte surface on
+  [`std::net`](net.md) ([`README.md`](README.md) § 5.8). A std written in
+  Xulo, rather than supplied by the host, also needs a language-level buffer
+  primitive ([`../README.md`](../README.md) § 1.3).
+
 ## URLs
 
 - A URL is one string: `http://`, then `host[:port]`, then an optional
