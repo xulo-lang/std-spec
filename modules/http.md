@@ -69,8 +69,9 @@ use std::http::{Request, Response, Server};
   a roadmap candidate ([`../README.md`](../README.md) § 1.2): it needs file
   handles and incremental I/O in [`std::fs`](fs.md) and a byte surface on
   [`std::net`](net.md) ([`README.md`](README.md) § 5.8). A std written in
-  Xulo, rather than supplied by the host, also needs a language-level buffer
-  primitive ([`../README.md`](../README.md) § 1.3).
+  Xulo, rather than supplied by the host, also needs a native platform layer
+  — a hidden implementation-registered package, since user-level FFI cannot
+  move buffers ([`../README.md`](../README.md) § 1.1).
 
 ## URLs
 

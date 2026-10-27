@@ -53,6 +53,20 @@ choosing an exit status (`modules/fs.md`, `modules/io.md`,
 here rather than through the foreign boundary of `ffi.md` in the language
 specification.
 
+**Self-hosting the library itself (informative).** The note above is about the
+compiler. Writing `std` in Xulo — the deferred file-handle and streaming-body
+surface, the byte-level `std::net` and `std::http` bodies — is a further step,
+and it is not a language change. It needs a **native platform layer**: an
+implementation-registered package, resolved the way `std` is today, whose
+members move bytes between Xulo and the host — `open`, `readInto`, `write`,
+`close`, and their socket twins, over `List<u8>` buffers and opaque `number`
+handles. User-level FFI cannot serve: `Ptr` is never dereferenced and never
+converts to or from an integer ([`ffi.md`](xulo-spec/ffi.md) § Ptr), and
+strings, lists, and buffers are outside its boundary (§ Not in scope).
+Exposing the same primitives as prelude intrinsics would be a language change;
+the hidden package is implementation work and keeps the Xulo code above it
+portable.
+
 ### 1.2 Roadmap
 
 The modules below are **candidates for future changes, not part of version
@@ -67,7 +81,7 @@ implemented:
 | `std::async` / `std::sync` / `std::thread` — intervals, channels, atomics, barriers | website `standard-library-net-fs` | not specified |
 | `std::net` UDP surface — `UdpSocket` | website `standard-library-net-fs` | not specified |
 | `std::http` extras — HTTPS/TLS, redirects, compression, keep-alive, multipart forms, graceful shutdown | design direction (Go `net/http`, Rust `axum`) | not specified |
-| `std::http` byte-faithful bodies — binary download/upload, file transfer, streaming bodies (language buffer primitives + `std::fs` handles + `std::net` bytes) | design direction (Go `io.Copy`, Node streams) | not specified |
+| `std::http` byte-faithful bodies — binary download/upload, file transfer, streaming bodies (native platform layer + `std::fs` handles + `std::net` bytes) | design direction (Go `io.Copy`, Node streams) | not specified |
 | `std::fs` object surface — `File`, `Path`, `FileMode` | website `standard-library-net-fs` | not specified |
 | `std::fs` extras — `lstat`, link metadata | design direction (POSIX `lstat`) | not specified |
 | `std::fs` streaming walk — `walkIter` | design direction (Go `walkDir`, language iterators) | not specified |
@@ -107,20 +121,6 @@ language specification governs everything in § 1.1's first row.
    is an ordinary expression statement; the language's `E0218` row admits
    only excepted control-flow constructs and discarded `send` tasks, so that
    row must admit a never-returning call when `std::process` lands.
-
-**Deferred: a platform layer for a Xulo-implemented std.** The chapters above
-specify contracts, not implementations; today the host supplies them. Writing
-the library itself in Xulo — the deferred file-handle surface and streaming
-bodies, the byte-level `std::net` and `std::http` bodies — needs a primitive
-that moves bytes between Xulo and the host: an opaque handle plus a read/write
-over `List<u8>` buffers, or the borrowed `Slice<u8>` and pinning that
-[`ffi.md`](xulo-spec/ffi.md) defers. `Ptr` alone cannot serve: it is never
-dereferenced, it never converts to or from an integer, and strings, lists,
-and buffers are outside the foreign boundary ([`ffi.md`](xulo-spec/ffi.md),
-§ Ptr and § Not in scope). This is a language-spec dependency, recorded here
-so the std roadmap shows it; it is not needed for this specification's
-consistency and does not block self-hosting the compiler, which uses these
-contracts as they are.
 
 **Convergence items** (contract here vs. the reference implementation today —
 work for the compiler, not for this document):

@@ -363,4 +363,4 @@ bytes become text only when a text reader accepts them as valid UTF-8, and
 byte values come from text, from files, or from literals. A byte-level
 surface for the streams (`std::io`, `std::net`, `std::http`) is a roadmap
 candidate ([`../README.md`](../README.md) § 1.2), and a std written in Xulo
-needs a language-level buffer primitive for it (§ 1.3).
+needs a native platform layer for it (§ 1.1).
