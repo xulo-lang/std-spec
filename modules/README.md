@@ -148,7 +148,7 @@ of names its glob binds — coincides with the exports for nine modules, and
 | `std::fs` | — | `read` `write` `append` `createNew` `touch` `setTimes` `exists` `stat` `copy` `rename` `remove` `mkdir` `readDir` `walk` `removeDir` `tempFile` `tempDir` | — |
 | `std::path` | — | `isAbsolute` `join` `dirname` `basename` `split` `ext` `stem` `withExt` `normalize` `relative` | — |
 | `std::os` | — | `getenv` `setenv` `cwd` `chdir` `tmpDir` `homeDir` `pid` `platform` `arch` `hostName` `userName` `cpuCount` | — |
-| `std::net` | — | `tcp_listen` `tcp_accept` `tcp_connect` `sock_read` `sock_write` `sock_shutdown` `sock_close` `sock_local_addr` `sock_peer_addr` | — |
+| `std::net` | — | `tcp_listen` `tcp_accept` `tcp_connect` `sock_read` `sock_write` `sock_shutdown` `sock_shutdown_write` `sock_close` `sock_local_addr` `sock_peer_addr` | — |
 | `std::process` | — | `exit` `args` `run` `exec` `launch` | `Command` `Child` |
 | `std::json` | — | `parse` `stringify` `valid` | — |
 | `std::regex` | — | — | `RegExp` `RegexError` `RegexMatch` |
@@ -181,9 +181,11 @@ A call to a `std` member is checked exactly like a call to any other
 function, against the signature this specification gives it:
 
 - **Arity** is fixed by the signature; too few or too many arguments are
-  `E0207`. Eight members accept optional trailing arguments, each with the
+  `E0207`. Twelve members accept optional trailing arguments, each with the
   range its chapter states: `std::process::run` (1–3), `std::process::exec`
-  (2–4), `std::process::launch` (1–3), `RegExp::compile` (1–2),
+  (2–4), `std::process::launch` (1–3), `std::net::tcp_connect` (1–2),
+  `std::net::tcp_accept` (1–2), `std::net::sock_read` (2–3),
+  `std::net::sock_write` (2–3), `RegExp::compile` (1–2),
   `std::fs::tempFile` and `std::fs::tempDir` (0–1),
   `std::json::stringify` (1–2), `std::time::fromParts` (3–7). An omitted
   argument takes the default its chapter states.

@@ -106,9 +106,10 @@ returns no value at all.
 | `sock_close` | `fn(handle: number): Result<unit, Error>` | `std::net` |
 | `sock_local_addr` | `fn(handle: number): Result<string, Error>` | `std::net` |
 | `sock_peer_addr` | `fn(handle: number): Result<string, Error>` | `std::net` |
-| `sock_read` | `fn(handle: number, max: number): Result<string?, Error>` | `std::net` |
+| `sock_read` | `fn(handle: number, max: number, timeout: u64? = null): Result<string?, Error>` | `std::net` |
 | `sock_shutdown` | `fn(handle: number): Result<unit, Error>` | `std::net` |
-| `sock_write` | `fn(handle: number, data: string): Result<number, Error>` | `std::net` |
+| `sock_shutdown_write` | `fn(handle: number): Result<unit, Error>` | `std::net` |
+| `sock_write` | `fn(handle: number, data: string, timeout: u64? = null): Result<number, Error>` | `std::net` |
 | `split` | `fn(path: string): { dir: string, base: string, ext: string }` | `std::path` |
 | `sqrt` | `fn(x: float): float` | `std::math` |
 | `stat` | `fn(path: string): Result<{ kind: string, size: number, modified: u64 }, Error>` | `std::fs` |
@@ -120,8 +121,8 @@ returns no value at all.
 | `stringify` | `fn(value: any, indent: number? = null): Result<string, Error>` | `std::json` |
 | `tan` | `fn(x: float): float` | `std::math` |
 | `TAU` | `float` (constant) | `std::math` |
-| `tcp_accept` | `fn(handle: number): Result<number, Error>` | `std::net` |
-| `tcp_connect` | `fn(addr: string): Result<number, Error>` | `std::net` |
+| `tcp_accept` | `fn(handle: number, timeout: u64? = null): Result<number, Error>` | `std::net` |
+| `tcp_connect` | `fn(addr: string, timeout: u64? = null): Result<number, Error>` | `std::net` |
 | `tcp_listen` | `fn(addr: string): Result<number, Error>` | `std::net` |
 | `tempDir` | `fn(prefix: string? = null): Result<string, Error>` | `std::fs` |
 | `tempFile` | `fn(prefix: string? = null): Result<string, Error>` | `std::fs` |

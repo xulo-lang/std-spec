@@ -1,6 +1,6 @@
 # `std::net`
 
-`std::net` holds the TCP socket surface: nine functions that bind, connect,
+`std::net` holds the TCP socket surface: ten functions that bind, connect,
 accept, read, write, shut down, close, and name sockets — every socket
 addressed by an opaque numeric **handle** that the openers issue and every
 member validates ([`../README.md`](../README.md) § 5). Version 0.1 is TCP
@@ -11,8 +11,8 @@ resolves, whether a bind is permitted, how large a listen backlog the
 kernel grants, and how a refused connection reports itself are the host's
 affair — the contract below is the shape of every answer. Failures are
 ordinary values ([`README.md`](README.md) § 5.1): a dead handle, a
-wrong-kind handle, or a refused connection arrives as `Result::Err`, and
-end of stream arrives as the `null` inside `string?`.
+wrong-kind handle, a refused connection, or an expired budget arrives as
+`Result::Err`, and end of stream arrives as the `null` inside `string?`.
 
 The qualified path needs no import:
 
@@ -22,10 +22,10 @@ std::net::sock_close(1)                  // ok: Result<unit, Error>
 ```
 
 Import forms are the six of [`README.md`](README.md) § 2.2; the face is the
-nine functions — no constants and no types ([`README.md`](README.md) § 3):
+ten functions — no constants and no types ([`README.md`](README.md) § 3):
 
 ```xulo
-use std::net::*;                         // the nine functions
+use std::net::*;                         // the ten functions
 use std::net as net;
 net::tcp_connect("127.0.0.1:8080")       // ok: same member, aliased
 use std::net::{sock_read, sock_write};
@@ -43,8 +43,9 @@ use std::net::{sock_read, sock_write};
   **stream** (`tcp_connect`, and every handle `tcp_accept` yields). A
   member given the wrong kind is `Err`, saying so — never a panic, never
   the operation half applied: `tcp_accept` on a stream is `Err`;
-  `sock_read`, `sock_write`, `sock_shutdown`, and `sock_peer_addr` on a
-  listener are `Err` (a listener has no peer and no data); `sock_close` and
+  `sock_read`, `sock_write`, `sock_shutdown`, `sock_shutdown_write`, and
+  `sock_peer_addr` on a listener are `Err` (a listener has no peer and no
+  data); `sock_close` and
   `sock_local_addr` accept **either kind**.
 - **Every member validates its handle first.** A number this process was
   never issued, an already-closed handle, and a wrong-kind handle are each
@@ -64,13 +65,44 @@ use std::net::{sock_read, sock_write};
   and `sock_local_addr` reads the assigned `"ip:port"` back — a string that
   can be handed straight to `tcp_connect`.
 
+## Timeouts
+
+- The four calls that can wait for the outside world — `tcp_connect`,
+  `tcp_accept`, `sock_read`, `sock_write` — take an optional trailing
+  `timeout: u64? = null`: a budget in **milliseconds**, measured from the
+  call's start. `null` waits without limit, the behavior before `timeout`
+  existed, kept as the default.
+- An expired budget is `Result::Err`, a fourth class beside the handle, the
+  address, and the host classes. It is not a runtime failure, and it never
+  arrives as absence: `Ok(null)` keeps meaning end of stream and nothing
+  else.
+- The handle a timed-out call was given stays open and usable —
+  `tcp_accept` may be tried again on the same listener, `sock_read` again
+  on the same stream.
+- A program that polls with a budget tells an expired budget from the other
+  `Err` classes only by the message it receives: version 0.1 has no
+  structured error kind ([`README.md`](README.md) § 5.1), so the shape of
+  every `Err` is the same. The distinction costs nothing at the call site
+  when a budget only exists to stop a hang.
+- What a timed-out call did is defined by the call: nothing is consumed by
+  `sock_read`, no handle is issued by `tcp_connect`, and only `sock_write`
+  can leave a prefix handed to the host (see [Writing](#writing)).
+- A call that finishes inside its budget never reports a timeout, however
+  close the finish.
+- `tcp_listen` takes no budget: binding a local address does not wait on
+  the outside world.
+- The budget is a property of the call, not of the socket. Version 0.1 has
+  no per-handle default budget; that is a roadmap candidate, and an
+  explicit `timeout` would always override such a default. Until then an
+  omitted `timeout` waits without limit.
+
 ## The openers
 
 | Member | Signature | Meaning |
 |--------|-----------|---------|
 | `std::net::tcp_listen` | `fn(addr: string): Result<number, Error>` | bind and listen on `addr`; yield the listener's handle |
-| `std::net::tcp_connect` | `fn(addr: string): Result<number, Error>` | connect to `addr`; yield the stream's handle |
-| `std::net::tcp_accept` | `fn(handle: number): Result<number, Error>` | wait for the next incoming connection on a listener; yield its **new** stream handle |
+| `std::net::tcp_connect` | `fn(addr: string, timeout: u64? = null): Result<number, Error>` | connect to `addr`, bounded by `timeout`; yield the stream's handle |
+| `std::net::tcp_accept` | `fn(handle: number, timeout: u64? = null): Result<number, Error>` | wait for the next incoming connection on a listener, bounded by `timeout`; yield its **new** stream handle |
 
 - `tcp_listen` uses the host's default listen backlog; on success the
   handle names a listener until `sock_close` releases it, and it stays open
@@ -80,18 +112,21 @@ use std::net::{sock_read, sock_write};
 - `tcp_connect` **blocks** until the connection completes or fails (a
   blocking member, [`README.md`](README.md) § 5.6). `Err` classes: the
   address does not resolve or is malformed; the connection is refused,
-  unreachable, or fails at the host for another reason.
+  unreachable, or fails at the host for another reason; the budget
+  expires. The budget covers name resolution and every candidate address;
+  an expired budget issues no handle.
 - `tcp_accept`'s operand must be a live listener. It **blocks** until a
   client arrives (§ 5.6) and yields a handle distinct from every other;
   the listener itself stays open and can accept again. `Err` classes: the
   handle is not open; the handle is a stream, not a listener; the host's
-  accept fails.
+  accept fails; the budget expires. A timed-out accept leaves the listener
+  open, so a server loop may simply accept again.
 
 ## Reading
 
 | Member | Signature | Meaning |
 |--------|-----------|---------|
-| `std::net::sock_read` | `fn(handle: number, max: number): Result<string?, Error>` | block for up to `max` bytes of input, decoded as UTF-8 |
+| `std::net::sock_read` | `fn(handle: number, max: number, timeout: u64? = null): Result<string?, Error>` | block for up to `max` bytes of input, decoded as UTF-8, bounded by `timeout` |
 
 - `max` is a byte count in **`1 …= 16777216`** (16 MiB); a fractional value
   counts as its truncation toward zero. A value outside that domain — zero,
@@ -101,6 +136,11 @@ use std::net::{sock_read, sock_write};
 - The call **blocks** until at least one byte arrives (§ 5.6) and yields
   **up to** `max` bytes of what has arrived: a short success is ordinary,
   and the next `sock_read` continues the stream where this one stopped.
+  The budget bounds the wait for the **first** byte; input already
+  available is returned without consulting it. A timed-out read consumes
+  nothing, so the next call starts where this one did. `Err` classes: the
+  handle is not open; the handle is a listener; the host reports an I/O
+  error; the budget expires.
 - Bytes are decoded **lossily** as UTF-8: a sequence that is not valid
   UTF-8 becomes U+FFFD replacement characters. Each call decodes its own
   bytes independently, so a multi-byte character **split across two reads**
@@ -120,7 +160,7 @@ use std::net::{sock_read, sock_write};
 
 | Member | Signature | Meaning |
 |--------|-----------|---------|
-| `std::net::sock_write` | `fn(handle: number, data: string): Result<number, Error>` | write `data`'s UTF-8 bytes; yield the byte count |
+| `std::net::sock_write` | `fn(handle: number, data: string, timeout: u64? = null): Result<number, Error>` | write `data`'s UTF-8 bytes, bounded by `timeout`; yield the byte count |
 
 - `data` is encoded as UTF-8 and the call **blocks** until every byte is
   handed to the host (§ 5.6): it **loops to completion** and never yields
@@ -129,13 +169,17 @@ use std::net::{sock_read, sock_write};
   counts 6. An empty `data` is success with `0`.
 - `Err` classes: the handle is not open; the handle is a listener; the
   stream is no longer writable (the peer is gone, or the handle was shut
-  down); the host reports an I/O error.
+  down); the host reports an I/O error; the budget expires. A timed-out
+  write bounds the whole loop and may follow a prefix already handed to the
+  host: the handle stays open, but the caller cannot assume the write was
+  complete, so frame above this layer when that matters.
 
 ## Shutting down and closing
 
 | Member | Signature | Meaning |
 |--------|-----------|---------|
 | `std::net::sock_shutdown` | `fn(handle: number): Result<unit, Error>` | half-close a stream in **both** directions |
+| `std::net::sock_shutdown_write` | `fn(handle: number): Result<unit, Error>` | half-close a stream's **writing** direction, leaving reading open |
 | `std::net::sock_close` | `fn(handle: number): Result<unit, Error>` | release the handle and close the socket |
 
 - `sock_shutdown` shuts a stream down for reading **and** writing: the peer
@@ -143,8 +187,17 @@ use std::net::{sock_read, sock_write};
   `sock_read` of the handle yields `Ok(null)`. The handle **stays open** in
   the module's registry: a later `sock_close` still succeeds and is what
   actually releases the socket, while a later `sock_write` is `Err` (the
-  stream is no longer writable). `Err` classes: the handle is not open; the
+  stream is no longer writable). It is exactly `sock_shutdown_write` plus a
+  local read-side shutdown. `Err` classes: the handle is not open; the
   handle is a listener.
+- `sock_shutdown_write` closes only the **writing** half: the peer sees end
+  of stream, while this side's `sock_read` keeps working until the peer
+  closes, and then yields `Ok(null)`. A later `sock_write` is `Err`; the
+  handle stays open, and `sock_close` still releases it. This is the shape
+  of a request-then-read exchange — write the request, half-close, read the
+  answer until EOF — and it is the composition point for protocols that
+  signal "request complete" with a FIN. `Err` classes: the handle is not
+  open; the handle is a listener.
 - `sock_close` releases the handle and closes the socket it named — a
   listener or a stream. From that moment every member on the number is
   `Err`, `sock_close` itself included: **a second close is `Err`**, not an
@@ -240,17 +293,19 @@ std::net::sock_close(accepted)           // runs: Err — already closed
 
 ## Blocking and asynchrony
 
-- All nine members are **synchronous** ([`README.md`](README.md) § 5.6): the
+- All ten members are **synchronous** ([`README.md`](README.md) § 5.6): the
   call returns when the host operation completes. The members that can wait
   on the outside world — the openers `tcp_listen`, `tcp_connect`,
   `tcp_accept` and the transfers `sock_read` and `sock_write` — are the
   **blocking members** of the terminology table; while one waits, no other
   task makes progress: the cooperative scheduler is frozen for the
-  duration.
+  duration. A `timeout` bounds the freeze ([Timeouts](#timeouts)); without
+  one the wait may be unbounded.
 - The freeze reaches single-threaded programs too, which makes the
   handshake order load-bearing: `tcp_connect` completes through the listen
   backlog *before* `tcp_accept` is called, so a program that calls
-  `tcp_accept` first — with no connection on its way — waits forever.
+  `tcp_accept` first — with no connection on its way — waits until a
+  `timeout` expires, or forever when it passes none.
 - Version 0.1 has no asynchronous variant of any member; that is a roadmap
   candidate ([`../README.md`](../README.md) § 1.2), not part of this
   version.
@@ -259,10 +314,10 @@ std::net::sock_close(accepted)           // runs: Err — already closed
 
 | Kind | Members |
 |------|---------|
-| Fallible (`Result`) | every member — `tcp_listen` `tcp_connect` `tcp_accept` `sock_read` `sock_write` `sock_shutdown` `sock_close` `sock_local_addr` `sock_peer_addr` |
+| Fallible (`Result`) | every member — `tcp_listen` `tcp_connect` `tcp_accept` `sock_read` `sock_write` `sock_shutdown` `sock_shutdown_write` `sock_close` `sock_local_addr` `sock_peer_addr` |
 | Absence (`Ok(null)`) | `sock_read` at end of stream |
 | Total | none |
-| Runtime failure | none — `sock_read`'s `max` domain is an `Err`, not a runtime failure |
+| Runtime failure | none — `sock_read`'s `max` domain is an `Err`, not a runtime failure; an expired `timeout` is an `Err` too |
 
 Failures are ordinary `Result::Err` values carrying `Error { message }`;
 message text is informative ([`README.md`](README.md) § 5.1,
@@ -273,8 +328,12 @@ plus the failure classes each section above enumerates.
 
 ```xulo
 std::net::tcp_listen("127.0.0.1:0")      // ok: Result<number, Error>
-std::net::sock_read(1)                   // error[E0207]: expected 2 arguments, found 1
+std::net::tcp_connect("127.0.0.1:8080", 500)  // ok: Result<number, Error>
+std::net::tcp_accept(1, 250)             // ok: Result<number, Error>
+std::net::sock_read(1, 16, 25)           // ok: Result<string?, Error>
+std::net::sock_read(1)                   // error[E0207]: expected 2 to 3 arguments, found 1
 std::net::sock_read("h", 16)             // error[E0202]: expected `number`, found `string`
+std::net::sock_shutdown_write(1)         // ok: Result<unit, Error>
 std::net::open("x")                      // error[E0601]: no member `open`
 Net::tcp_listen("127.0.0.1:0")           // error[E0607]: `Net` lives under `std`: use `std::net::tcp_listen`
 ```
