@@ -6,7 +6,7 @@
 **Language:** English
 
 This repository contains the normative specification of the Xulo standard
-library: the built-in `std` root, its ten modules, every member's signature,
+library: the built-in `std` root, its eleven modules, every member's signature,
 and the semantics a conforming implementation must provide.
 
 ## 1. Purpose and Scope
@@ -15,7 +15,7 @@ This specification defines the *design* of the standard library:
 
 - how `std` is reached — the namespace root, qualified paths, and the `use`
   forms a module has,
-- the ten modules of version 0.1 and the complete face of each,
+- the eleven modules of version 0.1 and the complete face of each,
 - the signature and the meaning of every member: total or fallible, which
   failures are values and which are runtime failures,
 - the shared conventions the modules hold in common: the `Result<T, Error>`
@@ -40,7 +40,7 @@ The following are deliberately **not** specified here:
 |----------|------------------------|
 | The language itself: the prelude types and operations, `Result`/`Error`/`Task`, the intrinsics `print`, `println`, `str`, `assert`, the `Task` namespace, name resolution, typing, diagnostics | [Xulo language specification](https://github.com/xulo-lang/spec) |
 | The prelude namespace spellings `Math::` and `Time::` — being folded into `std::math`/`std::time` by a language change (see § 1.3) | language specification, `spec/builtins/intrinsic-functions.md` (pending change) |
-| Library modules not among the ten — the blueprint inventory of the website (collections, async, sync, thread, HTTP, `Random`, `Instant`, `DateTime`, …) and the `std::io` generic direction | § 1.2 Roadmap |
+| Library modules not among the eleven — the blueprint inventory of the website (collections, async, sync, thread, `Random`, `Instant`, `DateTime`, …) and the `std::io` generic direction | § 1.2 Roadmap |
 | Tutorials, guides, and narrative reference prose | [xulo-website](https://xulo.org) |
 | The implementation: the `xulo-std` crate, the checker's registered tables, the CLI, the compiled back ends | implementation repository (`xulo`) |
 | Package registry protocol, manifest format, tooling | xulo-website ecosystem documentation |
@@ -55,8 +55,8 @@ boundary of `ffi.md` in the language specification.
 ### 1.2 Roadmap
 
 The modules below are **candidates for future changes, not part of version
-0.1** — most named by the xulo-website blueprint, one recording a design
-direction. Each enters this specification through the workflow in
+0.1** — most named by the xulo-website blueprint, the rest recording a
+design direction. Each enters this specification through the workflow in
 [`changes/`](changes/README.md) when — and only when — it is being
 implemented:
 
@@ -64,7 +64,8 @@ implemented:
 |-----------|--------|--------|
 | `std::collections` — `HashMap`, `BTreeMap`, `HashSet`, `Deque` | website `standard-library-net-fs` | not specified |
 | `std::async` / `std::sync` / `std::thread` — intervals, channels, atomics, barriers | website `standard-library-net-fs` | not specified |
-| `std::net` HTTP surface — `fetch`, `HttpListener`, `UdpSocket` | website `standard-library-net-fs` | not specified |
+| `std::net` UDP surface — `UdpSocket` | website `standard-library-net-fs` | not specified |
+| `std::http` extras — HTTPS/TLS, redirects, compression, keep-alive, streaming bodies, graceful shutdown | design direction (Go `net/http`, Rust `axum`) | not specified |
 | `std::fs` object surface — `File`, `Path`, `FileMode` | website `standard-library-net-fs` | not specified |
 | `std::io` generic surface — `Read`/`Write` traits over streams, files, sockets | design direction (Rust `std::io`, Go `io.Reader`) | not specified |
 | `std::math` extras — `Random`, `Matrix`, `Vector`, `Complex` | website `standard-library-net-fs` | not specified |
@@ -76,7 +77,7 @@ This specification is written for the world the implementation already
 implements (xulo-lang/xulo @ `08f6556`, including commit `238ff42`, *Math/Time
 moved into the std tree*). Three language changes must land in
 [xulo-lang/spec](https://github.com/xulo-lang/spec) to make the two documents
-consistent; until they do, this specification governs the ten modules and the
+consistent; until they do, this specification governs the eleven modules and the
 language specification governs everything in § 1.1's first row.
 
 1. **`Math`/`Time` move out of the prelude.** The language specification still
@@ -186,6 +187,7 @@ Additional conventions:
 | [`modules/path.md`](modules/path.md) | `std::path` — portable POSIX path string operations |
 | [`modules/os.md`](modules/os.md) | `std::os` — environment, working directory, host directories, process identity |
 | [`modules/net.md`](modules/net.md) | `std::net` — TCP sockets over opaque numeric handles |
+| [`modules/http.md`](modules/http.md) | `std::http` — HTTP/1.1 client and server over the TCP primitives |
 | [`modules/process.md`](modules/process.md) | `std::process` — exit status, argv, child capture, command building, child handles |
 | [`modules/json.md`](modules/json.md) | `std::json` — parse, stringify, and validate the JSON value model |
 | [`modules/regex.md`](modules/regex.md) | `std::regex` — `RegExp`, `RegexMatch`, substitution, and splitting |
@@ -200,7 +202,7 @@ normative for the whole specification.
 | Term | Definition |
 |------|------------|
 | **absence** | The state a fallible-or-optional member reports instead of a failure: the `null` inside `T?`. End of stream, unset variable, no match — absence is ordinary data, never an `Err`. See [`modules/README.md`](modules/README.md). |
-| **blocking member** | A member whose call does not return until the host operation completes — in version 0.1 the `std::io` readers, the `std::net` openers and reads/writes, and the `std::process` child waiters (`run`, `exec`, `Command::run`, `Child::wait`). See [`modules/README.md`](modules/README.md). |
+| **blocking member** | A member whose call does not return until the host operation completes — in version 0.1 the `std::io` readers, the `std::net` openers and reads/writes, the `std::http` client calls and server loop (`fetch`, `request`, `Server::serve`), and the `std::process` child waiters (`run`, `exec`, `Command::run`, `Child::wait`). See [`modules/README.md`](modules/README.md). |
 | **face** | The set of names a module's glob binds — `use std::math::*` binds the face. A module may export a name that its face withholds (see `std::io`). |
 | **fallible** | Of a member that returns `Result<T, Error>`: its failure is a value in the `Err` slot. |
 | **handle** | An opaque numeric name for a host resource — a socket — issued only by a `std::net` opener, accepted only by `std::net` members, and invalid after `sock_close`. |
@@ -240,7 +242,7 @@ language spec        normative for the language around std
 | `Math::PI`, `Time::now()` in scope without `use` | `std::math::PI`, `std::time::now()` — qualified through `std`, or imported |
 | `JSONError` enum, `JSON::parse<T>`, `parse_async` | failures are `Result<_, Error>`; there is no `JSONError` and no `parse_async` |
 | clocks return `u64`, `Time::now_nanos` casing | `u64`, lowerCamelCase `nowNanos` (agrees on type, differs on namespace) |
-| `File`, `fetch`, `HashMap`, `Random`, … | roadmap candidates only (§ 1.2) |
+| `File`, `HashMap`, `Random`, … | roadmap candidates only (§ 1.2) |
 | `string.replace` / `string.split` availability unstated | specified in [`modules/regex.md`](modules/regex.md) |
 
 ## 7. Contributing

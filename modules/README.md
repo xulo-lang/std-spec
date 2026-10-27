@@ -6,8 +6,8 @@ reaches it without declaring anything. The head `std` has exactly one level
 of children — the **modules** — and each module owns a set of members
 (constants, functions, or types) selected with `::`.
 
-Version 0.1 defines ten modules. The set is closed: a path whose module is
-not one of the ten does not resolve (`E0607`), and a member a module has not
+Version 0.1 defines eleven modules. The set is closed: a path whose module is
+not one of the eleven does not resolve (`E0607`), and a member a module has not
 listed below does not exist (`E0601`). New modules and new members enter
 through the workflow in [`../changes/`](../changes/README.md).
 
@@ -25,6 +25,7 @@ common. Each member's meaning is specified in its own module chapter.
 | `std::path` | portable POSIX path string operations | [`path.md`](path.md) |
 | `std::os` | environment; working directory; host directories; process identity | [`os.md`](os.md) |
 | `std::net` | TCP sockets over opaque numeric handles | [`net.md`](net.md) |
+| `std::http` | HTTP/1.1 client and server over the TCP primitives | [`http.md`](http.md) |
 | `std::process` | exit status; argv; child capture; command building and child handles | [`process.md`](process.md) |
 | `std::json` | parse, stringify, and validate the JSON value model | [`json.md`](json.md) |
 | `std::regex` | `RegExp`, `RegexMatch`, substitution, and splitting | [`regex.md`](regex.md) |
@@ -83,7 +84,7 @@ Notes:
 |----------|------|---------|
 | `use std;` | `E0607` | the root has no members of its own; bind a module, a member, or the face |
 | `use std::regex;` · `use std::regex as R;` | `E0607` | `std::regex` has no value namespace; import its names — `use std::regex::{RegExp, RegexError}` |
-| `use std::foo;` (unknown module) | `E0607` | the ten modules are the whole tree |
+| `use std::foo;` (unknown module) | `E0607` | the eleven modules are the whole tree |
 | `use std::math::floor::x;` (too deep) | `E0607` | members have no children |
 | `use std::math::nope;` | `E0601` | `module `std::math` does not export `nope`` |
 | `use std::io::print;` · `use std::io::{print};` | `E0601` | `print` is a prelude intrinsic name and cannot be rebound by a `use` |
@@ -137,7 +138,7 @@ nothing else.
 ## 3. Module faces
 
 The table lists each module's **exported** members; the **face** — the set
-of names its glob binds — coincides with the exports for nine modules, and
+of names its glob binds — coincides with the exports for ten modules, and
 `std::io` withholds two of its ten (see the note below).
 
 | Module | Constants | Functions | Types |
@@ -149,6 +150,7 @@ of names its glob binds — coincides with the exports for nine modules, and
 | `std::path` | — | `isAbsolute` `join` `dirname` `basename` `split` `ext` `stem` `withExt` `normalize` `relative` | — |
 | `std::os` | — | `getenv` `setenv` `cwd` `chdir` `tmpDir` `homeDir` `pid` `platform` `arch` `hostName` `userName` `cpuCount` | — |
 | `std::net` | — | `tcp_listen` `tcp_accept` `tcp_connect` `sock_read` `sock_write` `sock_shutdown` `sock_shutdown_write` `sock_close` `sock_local_addr` `sock_peer_addr` | — |
+| `std::http` | — | `fetch` `request` `listen` | `Request` `Response` `Server` |
 | `std::process` | — | `exit` `args` `run` `exec` `launch` | `Command` `Child` |
 | `std::json` | — | `parse` `stringify` `valid` | — |
 | `std::regex` | — | — | `RegExp` `RegexError` `RegexMatch` |
@@ -181,11 +183,13 @@ A call to a `std` member is checked exactly like a call to any other
 function, against the signature this specification gives it:
 
 - **Arity** is fixed by the signature; too few or too many arguments are
-  `E0207`. Twelve members accept optional trailing arguments, each with the
-  range its chapter states: `std::process::run` (1–3), `std::process::exec`
+  `E0207`. Sixteen members accept optional trailing arguments, each with
+  the range its chapter states: `std::process::run` (1–3), `std::process::exec`
   (2–4), `std::process::launch` (1–3), `std::net::tcp_connect` (1–2),
   `std::net::tcp_accept` (1–2), `std::net::sock_read` (2–3),
-  `std::net::sock_write` (2–3), `RegExp::compile` (1–2),
+  `std::net::sock_write` (2–3), `std::http::fetch` (1–2),
+  `std::http::request` (2–5), `Response::text` (1–2),
+  `Response::json` (1–2), `RegExp::compile` (1–2),
   `std::fs::tempFile` and `std::fs::tempDir` (0–1),
   `std::json::stringify` (1–2), `std::time::fromParts` (3–7). An omitted
   argument takes the default its chapter states.
@@ -271,6 +275,7 @@ reports it as `Err`:
 | no match | `std::regex::RegExp.find` → `null`; `RegexMatch.group` → `null` for group 0, out of range, a non-participating group, or an unknown name |
 | no relative path | `std::path::relative` → `null` when one side is absolute and the other relative, or when `from` would climb above the shared anchor |
 | variable not set | `std::os::getenv` → `Ok(null)` (set but the operation failed → `Err`) |
+| no header or query value | `std::http::Request.header` / `Request.queryValue` / `Response.header` → `null` |
 
 ### 5.3 Total, fallible, and runtime failure
 
@@ -296,7 +301,7 @@ meaning, not part of its type.
 
 | Portable (semantics fixed across hosts) | Host-dependent |
 |-------------------------------------------|----------------|
-| `std::math`, `std::time`, `std::json`, `std::regex`, `std::path` | `std::fs`, `std::os`, `std::net`, `std::process`, `std::io` |
+| `std::math`, `std::time`, `std::json`, `std::regex`, `std::path` | `std::fs`, `std::os`, `std::net`, `std::http`, `std::process`, `std::io` |
 
 `std::path` is the rule's illustration: it is portable **string** semantics
 with POSIX rules regardless of the host, while `std::fs` follows the host's
@@ -309,8 +314,9 @@ chapter says so where it matters.
 Every member of version 0.1 is synchronous: the call returns when the host
 operation completes. The members that can wait on the outside world for an
 unbounded time — the `std::io` readers (`readLine`, `read`, `readN`), the `std::net`
-openers and reads/writes, and the `std::process` child waiters (`run`,
-`exec`, `Command::run`, `Child::wait`) — are the **blocking
+openers and reads/writes, the `std::http` client calls and server loop
+(`fetch`, `request`, `Server::serve`), and the `std::process` child waiters
+(`run`, `exec`, `Command::run`, `Child::wait`) — are the **blocking
 members** named in the terminology table; while one waits, the caller does
 not make progress. Asynchronous
 variants are a roadmap candidate (`std::async`, [`../README.md`](../README.md)

@@ -1,8 +1,8 @@
 # Signature Index
 
-Every member of the ten modules in one list, ordered case-insensitively by
-member name. Constants show their type; the `std::regex` rows show the type
-together with its callable members. The face of each module — the names its
+Every member of the eleven modules in one list, ordered case-insensitively by
+member name. Constants show their type; a type's row shows it together with its
+callable members. The face of each module — the names its
 glob binds — is [`modules/README.md`](modules/README.md) § 3; where this
 index and a chapter disagree, the chapter governs.
 
@@ -45,6 +45,7 @@ returns no value at all.
 | `exp` | `fn(x: float): float` | `std::math` |
 | `expm1` | `fn(x: float): float` | `std::math` |
 | `ext` | `fn(path: string): string` | `std::path` |
+| `fetch` | `fn(url: string, timeout: u64? = null): Result<Response, Error>` | `std::http` |
 | `floor` | `fn(x: float): int` | `std::math` |
 | `flush` | `fn(): Result<unit, Error>` | `std::io` |
 | `format` | `fn(ms: u64): string` | `std::time` |
@@ -57,6 +58,7 @@ returns no value at all.
 | `isAbsolute` | `fn(path: string): bool` | `std::path` |
 | `join` | `fn(a: string, b: string): string` | `std::path` |
 | `launch` | `fn(cmd: string, input: string? = null, timeout: u64? = null): Result<Child, Error>` | `std::process` |
+| `listen` | `fn(addr: string): Result<Server, Error>` | `std::http` |
 | `log` | `fn(x: float): float` | `std::math` |
 | `log10` | `fn(x: float): float` | `std::math` |
 | `log1p` | `fn(x: float): float` | `std::math` |
@@ -94,10 +96,14 @@ returns no value at all.
 | `remove` | `fn(path: string): Result<unit, Error>` | `std::fs` |
 | `removeDir` | `fn(path: string): Result<unit, Error>` | `std::fs` |
 | `rename` | `fn(from: string, to: string): Result<unit, Error>` | `std::fs` |
+| `Request` | type; fields `method: string`, `path: string`, `query: List<{ name: string, value: string }>`, `headers: List<{ name: string, value: string }>`, `body: string`, `version: string`, `remoteAddr: string`; methods `fn header(name: string): string?`, `fn queryValue(name: string): string?` | `std::http` |
+| `request` | `fn(method: string, url: string, headers: List<{ name: string, value: string }>? = null, body: string? = null, timeout: u64? = null): Result<Response, Error>` | `std::http` |
+| `Response` | type; fields `status: number`, `headers: List<{ name: string, value: string }>`, `body: string`; static `fn text(body: string, status: number = 200): Response`, `fn json(value: any, status: number = 200): Result<Response, Error>`; method `fn header(name: string): string?` | `std::http` |
 | `rotateLeft` | `fn(x: int, amount: u64): int` | `std::math` |
 | `rotateRight` | `fn(x: int, amount: u64): int` | `std::math` |
 | `round` | `fn(x: float): int` | `std::math` |
 | `run` | `fn(cmd: string, input: string? = null, timeout: u64? = null): Result<{ stdout: string, stderr: string, code: number }, Error>` | `std::process` |
+| `Server` | type; methods `fn addr(): Result<string, Error>`, `fn serve(handler: fn(Request): Response): Result<unit, Error>`; constructed only by `listen` | `std::http` |
 | `setenv` | `fn(name: string, value: string): Result<unit, Error>` | `std::os` |
 | `setTimes` | `fn(path: string, modified: u64): Result<unit, Error>` | `std::fs` |
 | `sign` | `fn(x: number): number` | `std::math` |

@@ -4,8 +4,10 @@
 accept, read, write, shut down, close, and name sockets — every socket
 addressed by an opaque numeric **handle** that the openers issue and every
 member validates ([`../README.md`](../README.md) § 5). Version 0.1 is TCP
-over IPv4/IPv6 only: no UDP, no TLS, no HTTP surface — those are roadmap
-candidates ([`../README.md`](../README.md) § 1.2). The module is
+over IPv4/IPv6 only: no UDP, no TLS, no byte-level read API — those are
+roadmap candidates ([`../README.md`](../README.md) § 1.2). HTTP is not
+re-implemented here; it is a module above these primitives
+([`http.md`](http.md)). The module is
 host-dependent ([`README.md`](README.md) § 5.5): which addresses the host
 resolves, whether a bind is permitted, how large a listen backlog the
 kernel grants, and how a refused connection reports itself are the host's
@@ -290,6 +292,25 @@ std::net::sock_write(server, "x")        // runs: Err — a listener, not a stre
 std::net::sock_close(accepted)           // ok: the handle is released
 std::net::sock_close(accepted)           // runs: Err — already closed
 ```
+
+## HTTP over these primitives
+
+HTTP/1.1 is CRLF-delimited text carried by a TCP stream; nothing in this
+module is HTTP-aware, and everything an HTTP exchange needs is here:
+
+| HTTP step | Members |
+|-----------|---------|
+| fetch a URL | `tcp_connect`, then `sock_write` the request head and body |
+| read an answer to its end | `sock_read` in a loop, `Ok(null)` at end of stream |
+| signal "request complete" | `sock_shutdown_write`, then read until `Ok(null)` |
+| serve a URL | `tcp_listen`, `tcp_accept`, then `sock_read` and `sock_write` |
+| bound any of those waits | the `timeout` argument ([Timeouts](#timeouts)) |
+
+[`std::http`](http.md) packages exactly this — request and response types,
+a client, and a sequential serving loop — and owns the protocol rules
+(framing, size caps, statuses) that this module deliberately does not. A
+TLS layer would be a further module above both; `https` is not reachable
+from these primitives.
 
 ## Blocking and asynchrony
 
