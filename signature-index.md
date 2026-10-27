@@ -96,7 +96,7 @@ returns no value at all.
 | `remove` | `fn(path: string): Result<unit, Error>` | `std::fs` |
 | `removeDir` | `fn(path: string): Result<unit, Error>` | `std::fs` |
 | `rename` | `fn(from: string, to: string): Result<unit, Error>` | `std::fs` |
-| `Request` | type; fields `method: string`, `path: string`, `query: List<{ name: string, value: string }>`, `headers: List<{ name: string, value: string }>`, `body: string`, `version: string`, `remoteAddr: string`; methods `fn header(name: string): string?`, `fn queryValue(name: string): string?` | `std::http` |
+| `Request` | type; fields `method: string`, `path: string`, `query: List<{ name: string, value: string }>`, `form: List<{ name: string, value: string }>`, `headers: List<{ name: string, value: string }>`, `body: string`, `version: string`, `remoteAddr: string`; methods `fn header(name: string): string?`, `fn queryValue(name: string): string?`, `fn formValue(name: string): string?` | `std::http` |
 | `request` | `fn(method: string, url: string, headers: List<{ name: string, value: string }>? = null, body: string? = null, timeout: u64? = null): Result<Response, Error>` | `std::http` |
 | `Response` | type; fields `status: number`, `headers: List<{ name: string, value: string }>`, `body: string`; static `fn text(body: string, status: number = 200): Response`, `fn json(value: any, status: number = 200): Result<Response, Error>`; method `fn header(name: string): string?` | `std::http` |
 | `rotateLeft` | `fn(x: int, amount: u64): int` | `std::math` |

@@ -35,7 +35,7 @@ use std::http::{Request, Response, Server};
 | Type | Shape | Role |
 |------|-------|------|
 | `Server` | methods `addr`, `serve` | a bound, listening server |
-| `Request` | fields `method`, `path`, `query`, `headers`, `body`, `version`, `remoteAddr`; methods `header`, `queryValue` | one inbound request |
+| `Request` | fields `method`, `path`, `query`, `form`, `headers`, `body`, `version`, `remoteAddr`; methods `header`, `queryValue`, `formValue` | one inbound request |
 | `Response` | fields `status`, `headers`, `body`; static `text`, `json`; method `header` | one outbound response |
 
 - `Request` and `Response` are plain data: every field is public, and a
@@ -44,10 +44,10 @@ use std::http::{Request, Response, Server};
   handler directly, so handlers are testable without a socket.
 - `Server` is opaque: only `listen` issues one, and it has no public
   literal or constructor.
-- `headers` and `query` are lists of `{ name: string, value: string }`
-  records, in wire order and with duplicates kept. Header lookup is
-  case-insensitive, query lookup is exact, and both report absence as
-  `null`.
+- `headers`, `query`, and `form` are lists of `{ name: string,
+  value: string }` records, in wire order and with duplicates kept. Header
+  lookup is case-insensitive, query and form lookup are exact, the first
+  match wins, and all three report absence as `null`.
 
 ## URLs
 
@@ -142,6 +142,8 @@ use std::http::{Request, Response, Server};
   no pipelining.
 - Before the handler runs, the request is parsed:
   - the request line is `METHOD SP target SP HTTP/1.1`;
+  - an HTTP/1.1 request carries exactly one non-empty `Host` header; none,
+    more than one, or one containing a space is `400`;
   - the header block — request line and headers together — is at most
     **64 KiB**; a longer one is answered `431`;
   - a header is `name ":" value`, surrounding whitespace trimmed; a
@@ -150,14 +152,22 @@ use std::http::{Request, Response, Server};
   - `Expect: 100-continue`, when a body is expected, is answered with
     the interim `HTTP/1.1 100 Continue` before the body is read; any other
     `Expect` value is answered `417`;
-  - a body is read only when `Content-Length` is present and valid: one
-    decimal, at most **16 MiB** (larger is `413`, malformed is `400`). A
-    `Transfer-Encoding` header is answered `501`, because chunked request
-    bodies are not supported. Without `Content-Length` the body is the
-    empty string;
-  - `path` and `query` are split at the first `?`; without one the query
-    is the empty list. The target must start with `/` (`400` otherwise),
-    and percent escapes are decoded as [URLs](#urls) describes;
+  - a body is read only when `Content-Length` is present and valid:
+    exactly one plain decimal, at most **16 MiB** (larger is `413`;
+    malformed, repeated, or conflicting is `400`). A `Transfer-Encoding`
+    header is answered `501`, because chunked request bodies are not
+    supported. Without `Content-Length` the body is the empty string;
+  - when `Content-Type` is `application/x-www-form-urlencoded` (the media
+    type, ignoring case and parameters), `body` is also decoded into
+    `form`: an empty body yields the empty list, otherwise parts split at
+    `&` with empty parts ignored, each part at its first `=` (a part
+    without one has the empty value), `+` becoming a space before `%XX` is
+    decoded. A malformed escape is `400`. Any other media type leaves
+    `form` empty;
+  - `path` and `query` are split at the first `?`; without one, or with
+    nothing after it, the query is the empty list. The target must start
+    with `/` (`400` otherwise), and percent escapes are decoded as
+    [URLs](#urls) describes;
   - `remoteAddr` is the peer's `"ip:port"`.
 
   The error answers — `400`, `413`, `417`, `431`, `501`, `505` — carry an
@@ -168,8 +178,10 @@ use std::http::{Request, Response, Server};
   `200 …= 599` is sent as `500`. The handler's headers are written in
   order except `Content-Length`, `Connection`, and `Transfer-Encoding`,
   which are dropped; the server then writes `Content-Length` — the body's
-  UTF-8 byte length — and `Connection: close`. The reason phrase is the
-  host's; a client ignores it.
+  UTF-8 byte length — and `Connection: close`. Unless the handler supplied
+  a `Date`, the server writes one in IMF-fixdate from the host clock; a
+  host without a clock omits it. The reason phrase is the host's; a client
+  ignores it.
 - A `HEAD` request receives the response's headers and `Content-Length`
   but no body. Status `204` and `304` write no body and no
   `Content-Length`.
@@ -190,6 +202,10 @@ fn route(req: std::http::Request): std::http::Response {
     std::http::Response.text("xulo 0.1")
   } else if req.method == "POST" && req.path == "/echo" {
     std::http::Response.text(req.body, 201)
+  } else if req.method == "GET" && req.path == "/greet" {
+    std::http::Response.text("hello, " + (req.queryValue("name") ?? "stranger"))
+  } else if req.method == "POST" && req.path == "/greet" {
+    std::http::Response.text("hello, " + (req.formValue("name") ?? "stranger"))
   } else {
     std::http::Response.text("not found", 404)
   }
@@ -245,12 +261,28 @@ match std::http::fetch("http://127.0.0.1:8080/health", 2000) {
 }
 ```
 
-On the server side, a request's decoded query is data:
+The client side of the same loop is one call: the form POST reaches the
+handler above and the answer comes back as data.
+
+```xulo
+match std::http::request(
+  "POST",
+  "http://127.0.0.1:8080/greet",
+  [{ name: "content-type", value: "application/x-www-form-urlencoded" }],
+  "name=xulo"
+) {
+  Result::Ok(res) => print(res.body)     // runs: hello, xulo
+  Result::Err(e) => std::io::eprintln(e.message)
+}
+```
+
+On the server side, a request's decoded query and form are data:
 
 ```xulo
 req.path                     // runs: /search
 req.query                    // runs: [{ name: "q", value: "xulo" }, …]
 req.queryValue("q")          // runs: xulo
+req.formValue("name")        // runs: xulo — decoded only for a form body
 req.header("user-agent")     // runs: null when the client sent none
 ```
 
@@ -270,7 +302,7 @@ req.header("user-agent")     // runs: null when the client sent none
 | Kind | Members |
 |------|---------|
 | Fallible (`Result`) | `fetch`, `request`, `listen`, `Server::addr`, `Server::serve`, `Response::json` |
-| Absence (`string?`) | `Request::header`, `Request::queryValue`, `Response::header` — `null` when absent |
+| Absence (`string?`) | `Request::header`, `Request::queryValue`, `Request::formValue`, `Response::header` — `null` when absent |
 | Total | `Response::text`; construction and field reads of `Request` and `Response` |
 | Runtime failure | none — a handler's out-of-range status is sent as `500` |
 

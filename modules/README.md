@@ -275,7 +275,7 @@ reports it as `Err`:
 | no match | `std::regex::RegExp.find` → `null`; `RegexMatch.group` → `null` for group 0, out of range, a non-participating group, or an unknown name |
 | no relative path | `std::path::relative` → `null` when one side is absolute and the other relative, or when `from` would climb above the shared anchor |
 | variable not set | `std::os::getenv` → `Ok(null)` (set but the operation failed → `Err`) |
-| no header or query value | `std::http::Request.header` / `Request.queryValue` / `Response.header` → `null` |
+| no header, query, or form value | `std::http::Request.header` / `Request.queryValue` / `Request.formValue` / `Response.header` → `null` |
 
 ### 5.3 Total, fallible, and runtime failure
 

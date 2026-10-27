@@ -65,7 +65,7 @@ implemented:
 | `std::collections` — `HashMap`, `BTreeMap`, `HashSet`, `Deque` | website `standard-library-net-fs` | not specified |
 | `std::async` / `std::sync` / `std::thread` — intervals, channels, atomics, barriers | website `standard-library-net-fs` | not specified |
 | `std::net` UDP surface — `UdpSocket` | website `standard-library-net-fs` | not specified |
-| `std::http` extras — HTTPS/TLS, redirects, compression, keep-alive, streaming bodies, graceful shutdown | design direction (Go `net/http`, Rust `axum`) | not specified |
+| `std::http` extras — HTTPS/TLS, redirects, compression, keep-alive, streaming bodies, multipart forms, graceful shutdown | design direction (Go `net/http`, Rust `axum`) | not specified |
 | `std::fs` object surface — `File`, `Path`, `FileMode` | website `standard-library-net-fs` | not specified |
 | `std::io` generic surface — `Read`/`Write` traits over streams, files, sockets | design direction (Rust `std::io`, Go `io.Reader`) | not specified |
 | `std::math` extras — `Random`, `Matrix`, `Vector`, `Complex` | website `standard-library-net-fs` | not specified |
