@@ -149,7 +149,7 @@ of names its glob binds — coincides with the exports for ten modules, and
 | `std::fs` | — | `read` `readBytes` `write` `writeBytes` `append` `appendBytes` `createNew` `touch` `setTimes` `setMode` `exists` `realpath` `stat` `copy` `rename` `remove` `mkdir` `readDir` `walk` `removeDir` `tempFile` `tempFileIn` `tempDir` `tempDirIn` | — |
 | `std::path` | — | `isAbsolute` `join` `dirname` `basename` `split` `ext` `stem` `withExt` `normalize` `relative` | — |
 | `std::os` | — | `getenv` `setenv` `unsetenv` `cwd` `chdir` `tmpDir` `homeDir` `pid` `platform` `arch` `hostName` `userName` `execPath` `cpuCount` | — |
-| `std::net` | — | `tcp_listen` `tcp_accept` `tcp_connect` `sock_read` `sock_write` `sock_shutdown` `sock_shutdown_write` `sock_close` `sock_local_addr` `sock_peer_addr` | — |
+| `std::net` | — | `tcpListen` `tcpAccept` `tcpConnect` `sockRead` `sockWrite` `sockShutdown` `sockShutdownWrite` `sockClose` `sockLocalAddr` `sockPeerAddr` | — |
 | `std::http` | — | `fetch` `request` `listen` | `Request` `Response` `Server` |
 | `std::process` | — | `exit` `args` `run` `exec` `launch` | `Command` `Child` |
 | `std::json` | — | `parse` `stringify` `valid` | — |
@@ -185,9 +185,9 @@ function, against the signature this specification gives it:
 - **Arity** is fixed by the signature; too few or too many arguments are
   `E0207`. Eighteen members accept optional trailing arguments, each with
   the range its chapter states: `std::process::run` (1–3), `std::process::exec`
-  (2–4), `std::process::launch` (1–3), `std::net::tcp_connect` (1–2),
-  `std::net::tcp_accept` (1–2), `std::net::sock_read` (2–3),
-  `std::net::sock_write` (2–3), `std::http::fetch` (1–2),
+  (2–4), `std::process::launch` (1–3), `std::net::tcpConnect` (1–2),
+  `std::net::tcpAccept` (1–2), `std::net::sockRead` (2–3),
+  `std::net::sockWrite` (2–3), `std::http::fetch` (1–2),
   `std::http::request` (2–5), `Response::text` (1–2),
   `Response::json` (1–2), `RegExp::compile` (1–2),
   `std::fs::tempFile` and `std::fs::tempDir` (0–1),
@@ -295,7 +295,7 @@ reports it as `Err`:
 - **Total** members return their type directly, for every admissible
   argument — `std::path::join`, `std::math::sqrt`, `std::os::pid`.
 - **Fallible** members return `Result<T, Error>` — `std::fs::read`,
-  `std::net::tcp_connect`, `std::json::parse`.
+  `std::net::tcpConnect`, `std::json::parse`.
 - **Optional** members return `T?`, or `Result<T?, Error>` when they are both.
 - A **runtime failure** — a condition that stops the program, as
   `spec/memory-and-runtime.md` defines it — occurs only where a chapter
@@ -353,7 +353,7 @@ members are fixed by their chapters.
 
 Every `string` in the library is UTF-8 text, and the streams carry text
 only: the `std::io` readers and `std::fs::read` require valid UTF-8 and
-fail otherwise, while `std::net::sock_read` and `std::http` bodies decode
+fail otherwise, while `std::net::sockRead` and `std::http` bodies decode
 lossily, replacing each invalid sequence with U+FFFD. Arbitrary content
 crosses the **file** boundary through `std::fs`'s byte twins —
 `readBytes`, `writeBytes`, `appendBytes` — whose unit is `List<u8>` and

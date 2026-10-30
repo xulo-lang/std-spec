@@ -199,7 +199,7 @@ std::io::read()         // runs: Ok("") — no absence; contrast readLine's Ok(n
 | `std::io::readN` | `fn(max: number): Result<string?, Error>` | up to `max` bytes of stdin, decoded as UTF-8; `Ok(null)` at end of input |
 
 - `max` is a byte count in **`1 …= 16777216`** (16 MiB) — the same domain
-  [`net.md`](net.md)'s `sock_read` names — and a fractional value counts as
+  [`net.md`](net.md)'s `sockRead` names — and a fractional value counts as
   its truncation toward zero. A value outside that domain is `Err`, checked
   before the call blocks, so a bad `max` is reported whatever stdin holds.
   The domain is an `Err`, never a runtime failure.
@@ -212,7 +212,7 @@ std::io::read()         // runs: Ok("") — no absence; contrast readLine's Ok(n
 - Decoding is strict, as in `readLine` and `read`: bytes that are not valid
   UTF-8 are an `Err`, the `message` naming the byte offset (informative,
   [`../README.md`](../README.md) § 3.5) — never a replacement character.
-  [`net.md`](net.md)'s `sock_read` decodes lossily because a socket carries
+  [`net.md`](net.md)'s `sockRead` decodes lossily because a socket carries
   arbitrary bytes; stdin is text, as this module's other two readers
   already assume.
 - End of input is **absence**: `Ok(null)`, the same shape as `readLine`.

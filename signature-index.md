@@ -95,7 +95,7 @@ returns no value at all.
 | `realpath` | `fn(path: string): Result<string, Error>` | `std::fs` |
 | `RegexError` | type `{ message: string }`; constructed only by `RegExp::compile`'s `Err` | `std::regex` |
 | `RegexMatch` | type `{ value: string, index: int, end: int }` with `fn group(ref: number \| string): string?` | `std::regex` |
-| `RegExp` | type; static `fn compile(pattern: string, flags: string?): Result<RegExp, RegexError>`; methods `fn test(input: string): bool`, `fn find(input: string): RegexMatch?`, `fn find_all(input: string): List<RegexMatch>` | `std::regex` |
+| `RegExp` | type; static `fn compile(pattern: string, flags: string?): Result<RegExp, RegexError>`; methods `fn test(input: string): bool`, `fn find(input: string): RegexMatch?`, `fn findAll(input: string): List<RegexMatch>` | `std::regex` |
 | `relative` | `fn(from: string, to: string): string?` | `std::path` |
 | `remove` | `fn(path: string): Result<unit, Error>` | `std::fs` |
 | `removeDir` | `fn(path: string): Result<unit, Error>` | `std::fs` |
@@ -114,13 +114,13 @@ returns no value at all.
 | `sign` | `fn(x: number): number` | `std::math` |
 | `sin` | `fn(x: float): float` | `std::math` |
 | `sleep` | `fn(ms: u64): Task<unit>` | `std::time` |
-| `sock_close` | `fn(handle: number): Result<unit, Error>` | `std::net` |
-| `sock_local_addr` | `fn(handle: number): Result<string, Error>` | `std::net` |
-| `sock_peer_addr` | `fn(handle: number): Result<string, Error>` | `std::net` |
-| `sock_read` | `fn(handle: number, max: number, timeout: u64? = null): Result<string?, Error>` | `std::net` |
-| `sock_shutdown` | `fn(handle: number): Result<unit, Error>` | `std::net` |
-| `sock_shutdown_write` | `fn(handle: number): Result<unit, Error>` | `std::net` |
-| `sock_write` | `fn(handle: number, data: string, timeout: u64? = null): Result<number, Error>` | `std::net` |
+| `sockClose` | `fn(handle: number): Result<unit, Error>` | `std::net` |
+| `sockLocalAddr` | `fn(handle: number): Result<string, Error>` | `std::net` |
+| `sockPeerAddr` | `fn(handle: number): Result<string, Error>` | `std::net` |
+| `sockRead` | `fn(handle: number, max: number, timeout: u64? = null): Result<string?, Error>` | `std::net` |
+| `sockShutdown` | `fn(handle: number): Result<unit, Error>` | `std::net` |
+| `sockShutdownWrite` | `fn(handle: number): Result<unit, Error>` | `std::net` |
+| `sockWrite` | `fn(handle: number, data: string, timeout: u64? = null): Result<number, Error>` | `std::net` |
 | `split` | `fn(path: string): { dir: string, base: string, ext: string }` | `std::path` |
 | `sqrt` | `fn(x: float): float` | `std::math` |
 | `stat` | `fn(path: string): Result<{ kind: string, size: number, modified: u64, mode: number }, Error>` | `std::fs` |
@@ -132,9 +132,9 @@ returns no value at all.
 | `stringify` | `fn(value: any, indent: number? = null): Result<string, Error>` | `std::json` |
 | `tan` | `fn(x: float): float` | `std::math` |
 | `TAU` | `float` (constant) | `std::math` |
-| `tcp_accept` | `fn(handle: number, timeout: u64? = null): Result<number, Error>` | `std::net` |
-| `tcp_connect` | `fn(addr: string, timeout: u64? = null): Result<number, Error>` | `std::net` |
-| `tcp_listen` | `fn(addr: string): Result<number, Error>` | `std::net` |
+| `tcpAccept` | `fn(handle: number, timeout: u64? = null): Result<number, Error>` | `std::net` |
+| `tcpConnect` | `fn(addr: string, timeout: u64? = null): Result<number, Error>` | `std::net` |
+| `tcpListen` | `fn(addr: string): Result<number, Error>` | `std::net` |
 | `tempDir` | `fn(prefix: string? = null): Result<string, Error>` | `std::fs` |
 | `tempDirIn` | `fn(dir: string, prefix: string? = null): Result<string, Error>` | `std::fs` |
 | `tempFile` | `fn(prefix: string? = null): Result<string, Error>` | `std::fs` |

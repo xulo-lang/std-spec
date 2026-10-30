@@ -33,7 +33,7 @@ that `std::regex` types are reached through their imported name.
 
 | Type | Shape | Role |
 |------|-------|------|
-| `RegExp` | methods `test`, `find`, `find_all` | a compiled pattern |
+| `RegExp` | methods `test`, `find`, `findAll` | a compiled pattern |
 | `RegexError` | `{ message: string }` | what `RegExp::compile` reports on failure |
 | `RegexMatch` | `value: string`, `index: int`, `end: int`, `group(…)` | one match's text, position, and capture groups |
 
@@ -89,7 +89,7 @@ match RegExp::compile("[a-z") {
   `i g m u s` fails compilation with ``unknown flag `x` `` — a message the
   wrapper owns. An empty flags string (or the omitted argument) compiles
   with no flags.
-- `g` changes nothing else: `test`, `find`, and `find_all` behave the same
+- `g` changes nothing else: `test`, `find`, and `findAll` behave the same
   with and without it.
 
 ### The engine
@@ -134,11 +134,11 @@ match RegExp::compile("a.b", "s") {
 |--------|-----------|---------|
 | `RegExp::test` | `fn(input: string): bool` | whether the pattern matches anywhere in `input` |
 | `RegExp::find` | `fn(input: string): RegexMatch?` | the first (leftmost) match, or `null` |
-| `RegExp::find_all` | `fn(input: string): List<RegexMatch>` | every non-overlapping match, left to right |
+| `RegExp::findAll` | `fn(input: string): List<RegexMatch>` | every non-overlapping match, left to right |
 
 - `find` reports absence as `null` — ordinary data, not a failure
   ([`README.md`](README.md) § 5.2).
-- `find_all` returns matches in order, non-overlapping, **regardless of
+- `findAll` returns matches in order, non-overlapping, **regardless of
   `g`**. An empty match is a match: with pattern `a*` the input `"bab"`
   yields three matches — the empty match at the start, `a`, and the empty
   match at the end — and the scan always advances past a match, so the
@@ -156,7 +156,7 @@ match RegExp::compile("(\\d+)-(\\d+)") {
         } else {
             print("miss")
         }
-        for hit in re.find_all("x 42-7 y 8-9") {
+        for hit in re.findAll("x 42-7 y 8-9") {
             print(hit.value)                        // runs: 42-7, then 8-9
         }
     }
@@ -255,7 +255,7 @@ Like substitution, splitting is a method on `string`, not a module function
   `RegExp.split`.
 - The pieces are what the matches cut from the input — the text before the
   first match, between consecutive matches, and after the last — from the
-  same left-to-right, non-overlapping scan `find_all` runs, with its empty
+  same left-to-right, non-overlapping scan `findAll` runs, with its empty
   matches and **regardless of `g`**. A match at index 0 gives an empty
   first piece; a match ending at the end gives an empty last piece.
 - A pattern that does not match returns a one-element list holding the
@@ -280,7 +280,7 @@ match RegExp::compile(",") {
 | Kind | Members |
 |------|---------|
 | Fallible (`Result`) | `RegExp::compile` — `Result<RegExp, RegexError>`, the module's own error type |
-| Total | `RegExp::test`, `RegExp::find`, `RegExp::find_all`; `string.replace` and `string.split` for their declared argument types |
+| Total | `RegExp::test`, `RegExp::find`, `RegExp::findAll`; `string.replace` and `string.split` for their declared argument types |
 | Absence (`null`) | `find` with no match; `group` at index 0, out of range, not participating, or by a name no group has |
 | Runtime failure | `string.replace`'s function replacer returning a non-string; a replacer that is neither string nor function; a `replace` or `split` pattern argument that is not a compiled `RegExp` |
 

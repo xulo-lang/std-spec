@@ -53,7 +53,7 @@ use std::http::{Request, Response, Server};
 
 - A body is text in both directions: `Response.body` and `request`'s `body`
   are strings, and a received body is decoded lossily as UTF-8, exactly as
-  [`net.md`](net.md)'s `sock_read` decodes it. Bytes that are not valid text
+  [`net.md`](net.md)'s `sockRead` decodes it. Bytes that are not valid text
   become U+FFFD; they never arrive as an `Err`.
 - There is therefore **no byte-faithful download or upload** in version 0.1:
   fetching an image or an archive yields replacement characters, and
@@ -131,7 +131,7 @@ use std::http::{Request, Response, Server};
 - A response to a `HEAD` request carries no body, whatever its framing
   headers say: the client returns after the headers.
 - The body is decoded **lossily** as UTF-8 exactly as
-  [`net.md`](net.md)'s `sock_read` decodes it — the client is a byte
+  [`net.md`](net.md)'s `sockRead` decodes it — the client is a byte
   stream dressed as a string. `Content-Encoding` is not decoded and no
   `Accept-Encoding` is sent, so a compressed body arrives as replacement
   characters.

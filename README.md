@@ -138,7 +138,7 @@ work for the compiler, not for this document):
 | Numeric signatures — `float` results (the constants, `sqrt`, `sin`, …), `int` results (`floor`, `ceil`, `round`, `trunc`), `u64` (`sleep`, the clocks, the `rotate*` amount) | as the chapters write them | the checker reports `number` for every numeric result and checks numeric parameters against `number` (the loose numeric layer); the compiled path puts the four rounding results in an F64 slot rather than an integer one |
 | Head and member diagnostics — capital head (`Json::parse(…)`), unknown member (`std::json::dumps(…)`), called constant (`std::math::PI(…)`) | `E0607` / `E0601` / `E0204` | reported as the coarse fallback `E0003`, without the fine-grained code |
 | `std::regex` reachability — unimported types in annotation position, aliased types (`use std::regex::RegExp as R;` then `R::compile(…)`) | all three types resolve in annotations without an import; an alias behaves like any other binding; the diagnostics the tables state | only `RegexMatch` resolves unimported; an aliased type does not answer `::compile`; regex path rejections report the coarse `E0003` |
-| `std::net` member spelling | `tcp_listen` etc. as registered | matches — but is snake_case against the lowerCamelCase naming convention; settle before 1.0 |
+| `std::net` member spelling | `tcpListen` `tcpConnect` `tcpAccept` `sockRead` `sockWrite` `sockShutdown` `sockShutdownWrite` `sockClose` `sockLocalAddr` `sockPeerAddr` (lowerCamelCase, per [`names.md`](xulo-spec/names.md)) | still registered as `tcp_listen` etc. (snake_case); rename before 1.0 |
 
 ## 2. Status and Versioning
 
@@ -232,7 +232,7 @@ normative for the whole specification.
 | **blocking member** | A member whose call does not return until the host operation completes — in version 0.1 the `std::io` readers, the `std::net` openers and reads/writes, the `std::http` client calls and server loop (`fetch`, `request`, `Server::serve`), and the `std::process` child waiters (`run`, `exec`, `Command::run`, `Child::wait`). See [`modules/README.md`](modules/README.md). |
 | **face** | The set of names a module's glob binds — `use std::math::*` binds the face. A module may export a name that its face withholds (see `std::io`). |
 | **fallible** | Of a member that returns `Result<T, Error>`: its failure is a value in the `Err` slot. |
-| **handle** | An opaque numeric name for a host resource — a socket — issued only by a `std::net` opener, accepted only by `std::net` members, and invalid after `sock_close`. |
+| **handle** | An opaque numeric name for a host resource — a socket — issued only by a `std::net` opener, accepted only by `std::net` members, and invalid after `sockClose`. |
 | **member** | One constant or function of a module, selected with `::` (`std::math::PI`, `std::fs::read(…)`), or bound by a `use`. |
 | **std root** | The built-in namespace head `std`: provided by the compiler, backed by no file, no manifest, and no package initialization. |
 | **total** | Of a member that never fails: it returns its declared type directly, with no `Result` and no absence, for every admissible argument. |
