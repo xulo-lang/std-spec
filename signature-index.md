@@ -1,6 +1,6 @@
 # Signature Index
 
-Every member of the eleven modules in one list, ordered case-insensitively by
+Every member of the twelve modules in one list, ordered case-insensitively by
 member name. Constants show their type; a type's row shows it together with its
 callable members. The face of each module — the names its
 glob binds — is [`modules/README.md`](modules/README.md) § 3; where this
@@ -50,6 +50,7 @@ returns no value at all.
 | `fetch` | `fn(url: string, timeout: u64? = null): Result<Response, Error>` | `std::http` |
 | `floor` | `fn(x: float): int` | `std::math` |
 | `flush` | `fn(): Result<unit, Error>` | `std::io` |
+| `format` | `fn(template: string, args: List<any> = []): string` | `std::fmt` |
 | `format` | `fn(ms: u64): string` | `std::time` |
 | `fromParts` | `fn(year: int, month: int, day: int, hour: int = 0, minute: int = 0, second: int = 0, millisecond: int = 0): u64` | `std::time` |
 | `getenv` | `fn(name: string): Result<string?, Error>` | `std::os` |

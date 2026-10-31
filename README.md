@@ -6,7 +6,7 @@
 **Language:** English
 
 This repository contains the normative specification of the Xulo standard
-library: the built-in `std` root, its eleven modules, every member's signature,
+library: the built-in `std` root, its twelve modules, every member's signature,
 and the semantics a conforming implementation must provide.
 
 ## 1. Purpose and Scope
@@ -15,7 +15,7 @@ This specification defines the *design* of the standard library:
 
 - how `std` is reached — the namespace root, qualified paths, and the `use`
   forms a module has,
-- the eleven modules of version 0.1 and the complete face of each,
+- the twelve modules of version 0.1 and the complete face of each,
 - the signature and the meaning of every member: total or fallible, which
   failures are values and which are runtime failures,
 - the shared conventions the modules hold in common: the `Result<T, Error>`
@@ -40,7 +40,7 @@ The following are deliberately **not** specified here:
 |----------|------------------------|
 | The language itself: the prelude types and operations, `Result`/`Error`/`Task`, the intrinsics `print`, `println`, `str`, `assert`, the `Task` namespace, name resolution, typing, diagnostics | [Xulo language specification](https://github.com/xulo-lang/spec) |
 | The prelude namespace spellings `Math::` and `Time::` — being folded into `std::math`/`std::time` by a language change (see § 1.3) | language specification, `spec/builtins/intrinsic-functions.md` (pending change) |
-| Library modules not among the eleven — the blueprint inventory of the website (collections, async, sync, thread, `Random`, `Instant`, `DateTime`, …) and the `std::io` generic direction | § 1.2 Roadmap |
+| Library modules not among the twelve — the blueprint inventory of the website (collections, async, sync, thread, `Random`, `Instant`, `DateTime`, …) and the `std::io` generic direction | § 1.2 Roadmap |
 | Tutorials, guides, and narrative reference prose | [xulo-website](https://xulo.org) |
 | The implementation: the `xulo-std` crate, the checker's registered tables, the CLI, the compiled back ends | implementation repository (`xulo`) |
 | Package registry protocol, manifest format, tooling | xulo-website ecosystem documentation |
@@ -96,7 +96,7 @@ This specification is written for the world the implementation already
 implements (xulo-lang/xulo @ `08f6556`, including commit `238ff42`, *Math/Time
 moved into the std tree*). Five language changes must land in
 [xulo-lang/spec](https://github.com/xulo-lang/spec) to make the two documents
-consistent; until they do, this specification governs the eleven modules and the
+consistent; until they do, this specification governs the twelve modules and the
 language specification governs everything in § 1.1's first row.
 
 1. **`Math`/`Time` move out of the prelude.** The language specification still
@@ -108,8 +108,9 @@ language specification governs everything in § 1.1's first row.
    and `assert`, drops `Math`/`Time` from the prelude tables and the
    reserved-name list, and updates the prose that names them elsewhere (the
    narrowing sentence in `spec/type-system/coercion.md`, for example).
-2. **The type `any`.** `std::json` signatures are written with `any`, the type
-   of a value the checker does not check: `any` is assignable to and from
+2. **The type `any`.** `std::json` and `std::fmt` signatures are written
+   with `any`, the type of a value the checker does not check: `any` is
+   assignable to and from
    every type and admits every member access — distinct from the language's
    top type `unknown`, which admits nothing without narrowing. The language
    specification does not yet name `any`; adopting it is a language change.

@@ -6,8 +6,8 @@ reaches it without declaring anything. The head `std` has exactly one level
 of children — the **modules** — and each module owns a set of members
 (constants, functions, or types) selected with `::`.
 
-Version 0.1 defines eleven modules. The set is closed: a path whose module is
-not one of the eleven does not resolve (`E0607`), and a member a module has not
+Version 0.1 defines twelve modules. The set is closed: a path whose module is
+not one of the twelve does not resolve (`E0607`), and a member a module has not
 listed below does not exist (`E0601`). New modules and new members enter
 through the workflow in [`../changes/`](../changes/README.md).
 
@@ -29,6 +29,7 @@ common. Each member's meaning is specified in its own module chapter.
 | `std::process` | exit status; argv; child capture; command building and child handles | [`process.md`](process.md) |
 | `std::json` | parse, stringify, and validate the JSON value model | [`json.md`](json.md) |
 | `std::regex` | `RegExp`, `RegexMatch`, substitution, and splitting | [`regex.md`](regex.md) |
+| `std::fmt` | formatted text from a template and values: verbs, flags, width, and precision | [`fmt.md`](fmt.md) |
 
 ## 2. Reaching the standard library
 
@@ -84,7 +85,7 @@ Notes:
 |----------|------|---------|
 | `use std;` | `E0607` | the root has no members of its own; bind a module, a member, or the face |
 | `use std::regex;` · `use std::regex as R;` | `E0607` | `std::regex` has no value namespace; import its names — `use std::regex::{RegExp, RegexError}` |
-| `use std::foo;` (unknown module) | `E0607` | the eleven modules are the whole tree |
+| `use std::foo;` (unknown module) | `E0607` | the twelve modules are the whole tree |
 | `use std::math::floor::x;` (too deep) | `E0607` | members have no children |
 | `use std::math::nope;` | `E0601` | `module `std::math` does not export `nope`` |
 | `use std::io::print;` · `use std::io::{print};` | `E0601` | `print` is a prelude intrinsic name and cannot be rebound by a `use` |
@@ -138,7 +139,7 @@ nothing else.
 ## 3. Module faces
 
 The table lists each module's **exported** members; the **face** — the set
-of names its glob binds — coincides with the exports for ten modules, and
+of names its glob binds — coincides with the exports for eleven modules, and
 `std::io` withholds two of its ten (see the note below).
 
 | Module | Constants | Functions | Types |
@@ -154,6 +155,7 @@ of names its glob binds — coincides with the exports for ten modules, and
 | `std::process` | — | `exit` `args` `run` `exec` `launch` | `Command` `Child` |
 | `std::json` | — | `parse` `stringify` `valid` | — |
 | `std::regex` | — | — | `RegExp` `RegexError` `RegexMatch` |
+| `std::fmt` | — | `format` | — |
 
 **`std::io` exports ten functions and withholds two from its face.**
 `print` and `println` are members — `std::io::print(…)` is a checked, typed
@@ -183,7 +185,7 @@ A call to a `std` member is checked exactly like a call to any other
 function, against the signature this specification gives it:
 
 - **Arity** is fixed by the signature; too few or too many arguments are
-  `E0207`. Eighteen members accept optional trailing arguments, each with
+  `E0207`. Nineteen members accept optional trailing arguments, each with
   the range its chapter states: `std::process::run` (1–3), `std::process::exec`
   (2–4), `std::process::launch` (1–3), `std::net::tcpConnect` (1–2),
   `std::net::tcpAccept` (1–2), `std::net::sockRead` (2–3),
@@ -192,7 +194,8 @@ function, against the signature this specification gives it:
   `Response::json` (1–2), `RegExp::compile` (1–2),
   `std::fs::tempFile` and `std::fs::tempDir` (0–1),
   `std::fs::tempFileIn` and `std::fs::tempDirIn` (1–2),
-  `std::json::stringify` (1–2), `std::time::fromParts` (3–7). An omitted
+  `std::json::stringify` (1–2), `std::fmt::format` (1–2),
+  `std::time::fromParts` (3–7). An omitted
   argument takes the default its chapter states.
 - **Argument types** are the signature's parameter types; a non-assignable
   argument is `E0202`. Literals coerce as the language's coercion table
@@ -314,7 +317,7 @@ meaning, not part of its type.
 
 | Portable (semantics fixed across hosts) | Host-dependent |
 |-------------------------------------------|----------------|
-| `std::math`, `std::time`, `std::json`, `std::regex`, `std::path` | `std::fs`, `std::os`, `std::net`, `std::http`, `std::process`, `std::io` |
+| `std::math`, `std::time`, `std::json`, `std::regex`, `std::path`, `std::fmt` | `std::fs`, `std::os`, `std::net`, `std::http`, `std::process`, `std::io` |
 
 `std::path` is the rule's illustration: it is portable **string** semantics
 with POSIX rules regardless of the host, while `std::fs` follows the host's
@@ -341,7 +344,8 @@ discarding it is `E0218`.
 
 Where a chapter claims it, a conforming implementation produces the same
 result for the same inputs on every host: `std::json`'s output order, every
-`std::path` member, every `std::regex` match, and `std::time`'s calendar
+`std::fmt` result, every `std::path` member, every `std::regex` match, and
+`std::time`'s calendar
 members (`format`, `parse`, `parts`, `fromParts`, `weekday`) are
 deterministic.
 Transcendental `std::math` functions (`sin`, `log`, `exp`, …) delegate to the
