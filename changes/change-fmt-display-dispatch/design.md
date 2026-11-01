@@ -131,8 +131,12 @@ containers, an `enum` whose type implements neither — a written precision
 cuts the rendered text to that many scalars, as the chapter says today.
 
 - It keeps the rule to a sentence, stated once in the dispatch prose.
-- It matches Go's `%.3s` of a non-string, and it keeps `format("%.3s",
-  ["hello"])` — the chapter's existing example — working unchanged.
+- It keeps `format("%.3s", ["hello"])` — the chapter's existing example —
+  working unchanged, and agrees with Go where Go agrees with itself: a
+  string operand is cut to the precision. On a table-rendered non-string
+  Go prints `%!s(int=…)`-shaped junk and ignores the precision, so there
+  is nothing there to match — the cut of a table rendering is this
+  chapter's own rule.
 - The cut of a container rendering (`%.3s` of `[1, 2, 3]` is `[1,`) is
   strange but defined, and examples will show it once so no reader has to
   guess.
@@ -184,18 +188,28 @@ value — exact within ±2⁵³, ties to even beyond.
   even (IEEE-754 roundTiesToEven) — the rule the format itself defines for
   rounding a value to a representable one.
 
-### `%g` without precision keeps the operand type's shortest digits
+### `%g` without precision keeps the operand type's shortest digits, and takes the form threshold as 6
 
 **Decision.** Omitted precision prints the shortest digit string that reads
 back as the same value: the `f32` row of the Output table for an `f32`
 operand, the `float` row otherwise (integers having been converted as
-above). The form rule takes `precision` to be that string's digit count —
-the significant digits unique read-back needs — so `0.1` prints `0.1`
-(`-1` neither below `−4` nor reaching `1`) and `1e20` prints `1e+20`
-(`20` reaching `1`). This is Go's default-precision rule; without it the
-form rule's reference to `precision` would dangle whenever the directive
-writes none.
+above). For the form rule alone an omitted `precision` counts as `6` —
+`%e` when the leading digit's exponent is below `−4` or reaches `6` — so
+`0.1` prints `0.1`, `100000.0` prints `100000`, `1234567.0` prints
+`1.234567e+06`, and `1e20` prints `1e+20`. Without a value for the
+threshold the form rule's reference to `precision` would dangle whenever
+the directive writes none.
 
+- Go and C take the same threshold — 6 — for a `%g` whose directive writes
+  no precision. They differ from each other on the *digits* (C rounds the
+  default to six significant digits, Go prints the shortest); this chapter
+  keeps the shortest, the digits the Output table already fixes for `%v`.
+- The digit-count threshold — counting the shortest string's digits as the
+  `precision` the form rule compares against — was rejected: round values
+  have short unique strings, so it sends ordinary integers to scientific
+  notation. `1000.0` and `100000.0` each have one significant digit, so
+  each would print `1e+03` and `1e+05`, where Go and C print `1000` and
+  `100000`.
 - Pure widening for `%g` as well would disagree with `%v` on one and the
   same value: `%v` of an `f32` third prints `0.33333334` (the `f32` row),
   while a widened shortest-roundtrip would print `0.3333333432674408`. The

@@ -135,13 +135,12 @@ std::fmt::format("%x", [small])                 // ok: "ff"
 - `%g` reads `precision` as **significant digits** (`1 …= 17`): it rounds to
   that many and then drops trailing zeros from the `%f` form — and the point,
   when nothing follows it. The form is the `%e` one when the decimal
-  exponent of the leading digit is below `−4` or reaches `precision`, and
-  the `%f` one otherwise. Omitted, `%g` prints the shortest digit string
-  that reads back as the same value: for an `f32` operand the digits of the
-  `f32` row of the Output table — the same digits `%v` prints — and
-  otherwise the digits of the `float` row; the form rule then takes
-  `precision` to be that string's digit count, so `0.1` prints `0.1` and
-  `1e20` prints `1e+20`.
+  exponent of the leading digit is below `−4` or reaches `precision` — an
+  omitted `precision` counting as `6` for this rule alone — and the `%f`
+  one otherwise. Omitted, `%g` prints the shortest digit string that reads
+  back as the same value: for an `f32` operand the digits of the `f32` row
+  of the Output table — the same digits `%v` prints — and otherwise the
+  digits of the `float` row.
 - `%f` and `%e` give six digits after the point when precision is omitted,
   the Go and C default.
 
@@ -151,7 +150,9 @@ print(std::fmt::format("%.2f", [3.14159]))     // runs: 3.14
 print(std::fmt::format("%e", [1234.5]))        // runs: 1.234500e+03
 print(std::fmt::format("%.3g", [0.1]))         // runs: 0.1
 print(std::fmt::format("%g", [1e-7]))          // runs: 1e-07
-print(std::fmt::format("%g", [1e20]))          // runs: 1e+20 — one significant digit; 20 reaches it
+print(std::fmt::format("%g", [100000.0]))      // runs: 100000 — exponent 5 stops short of the omitted 6
+print(std::fmt::format("%g", [1234567.0]))     // runs: 1.234567e+06 — exponent 6 reaches it
+print(std::fmt::format("%g", [1e20]))          // runs: 1e+20
 let half: f32 = 0.5
 std::fmt::format("%.1f", [half])               // ok: "0.5" — widened to its exact float
 let one: f32 = 1

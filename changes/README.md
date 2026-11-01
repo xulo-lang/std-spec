@@ -102,7 +102,7 @@ never a version number or an implementation detail.
 
 | Change | Status | Summary |
 |--------|--------|---------|
-| [change-fmt-display-dispatch/](change-fmt-display-dispatch/proposal.md) | draft | `%v`/`%s` become a `Display`/`Debug` consumer under the directive's `Format`; precision and `#` hand off to user implementations; fixed-bit values join the integer/float verbs |
+| [change-fmt-display-dispatch/](change-fmt-display-dispatch/proposal.md) | review | `%v`/`%s` become a `Display`/`Debug` consumer under the directive's `Format`; precision and `#` hand off to user implementations; fixed-bit values join the integer/float verbs |
 
 ## Archived
 
