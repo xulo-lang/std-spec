@@ -1,6 +1,6 @@
 # Change fmt's Text Verbs to a Display/Debug Consumer
 
-**Status:** review · **Date:** 2026-11-01 · **Affects:** `modules/fmt.md`
+**Status:** accepted · **Date:** 2026-11-01 · **Affects:** `modules/fmt.md`
 
 ## Summary
 

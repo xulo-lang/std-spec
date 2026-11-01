@@ -102,7 +102,6 @@ never a version number or an implementation detail.
 
 | Change | Status | Summary |
 |--------|--------|---------|
-| [change-fmt-display-dispatch/](change-fmt-display-dispatch/proposal.md) | review | `%v`/`%s` become a `Display`/`Debug` consumer under the directive's `Format`; precision and `#` hand off to user implementations; fixed-bit values join the integer/float verbs |
 
 ## Archived
 
@@ -111,3 +110,4 @@ Accepted and rejected changes leave the index above and are kept in
 
 | Change | Status | Summary |
 |--------|--------|---------|
+| [archive/change-fmt-display-dispatch/](archive/change-fmt-display-dispatch/proposal.md) | accepted | `%v`/`%s` become a `Display`/`Debug` consumer under the directive's `Format`; precision and `#` hand off to user implementations; fixed-bit values join the integer/float verbs |
