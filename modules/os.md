@@ -3,8 +3,8 @@
 `std::os` holds the small surface a program needs to talk to the operating
 system it runs on: the environment, the current working directory, well-known
 host directories, and process and host identity. Its fallible members report
-failure in the `Result` slot; `pid`, `platform`, `arch`, `tmpDir`, and
-`cpuCount` are total and never fail. The module is host-dependent — which
+failure in the `Result` slot; `pid`, `platform`, `arch`, `tmp_dir`, and
+`cpu_count` are total and never fail. The module is host-dependent — which
 variables exist, which directory is current or temporary, and which strings
 `platform`/`arch` yield depend on the host
 ([`README.md`](README.md) § 5.5).
@@ -36,7 +36,7 @@ use std::os::{getenv, setenv};
 
 - `getenv` distinguishes three cases. A variable that is set yields
   `Ok(value)`. A variable that is unset yields `Ok(null)` — **absence**, the
-  same optional-string shape [`io.md`](io.md)'s `readLine` uses for
+  same optional-string shape [`io.md`](io.md)'s `read_line` uses for
   end-of-stream. A variable that is set but whose value is not valid UTF-8
   yields `Err`: that is a failure, not a lie of `null` — absence means
   *unset*, failure means *unreadable*. A variable set to the empty string is
@@ -106,24 +106,24 @@ match std::os::cwd() {
 
 | Member | Signature | Meaning |
 |--------|-----------|---------|
-| `std::os::tmpDir` | `fn(): string` | the host's temporary directory |
-| `std::os::homeDir` | `fn(): Result<string, Error>` | the current user's home directory |
+| `std::os::tmp_dir` | `fn(): string` | the host's temporary directory |
+| `std::os::home_dir` | `fn(): Result<string, Error>` | the current user's home directory |
 
-- `tmpDir` yields the value of the host's temporary-directory variable
+- `tmp_dir` yields the value of the host's temporary-directory variable
   (`TMPDIR` on a POSIX host, the host's own where it differs) when it is set
   and non-empty, else the platform default — `/tmp` on a POSIX host. It is
   total and never checks that the directory exists: probing and creating are
-  [`fs.md`](fs.md)'s work (`tempFile` and `tempDir` already create there).
-- `homeDir` yields the home directory from the variable the host defines —
+  [`fs.md`](fs.md)'s work (`temp_file` and `temp_dir` already create there).
+- `home_dir` yields the home directory from the variable the host defines —
   `HOME` on a POSIX host, the host's own where it differs. A variable that is
   unset or set to the empty string yields `Err`: no home is discoverable,
-  which is a failure to answer, not an absence — `homeDir` has no `Ok(null)`.
+  which is a failure to answer, not an absence — `home_dir` has no `Ok(null)`.
   Any other host error yields `Err` as well.
 
 ```xulo
-print(std::os::tmpDir())             // runs: e.g. /tmp
+print(std::os::tmp_dir())             // runs: e.g. /tmp
 
-match std::os::homeDir() {
+match std::os::home_dir() {
   Result::Ok(dir) => std::io::println(dir)   // runs: an absolute path string
   Result::Err(e) => std::io::eprintln(e.message)
 }
@@ -136,17 +136,17 @@ match std::os::homeDir() {
 | `std::os::pid` | `fn(): number` | the process id |
 | `std::os::platform` | `fn(): string` | the operating-system family |
 | `std::os::arch` | `fn(): string` | the CPU architecture |
-| `std::os::hostName` | `fn(): Result<string, Error>` | the machine's name |
-| `std::os::userName` | `fn(): Result<string, Error>` | the user the process runs as |
-| `std::os::execPath` | `fn(): Result<string, Error>` | the executable the host started for this process |
-| `std::os::cpuCount` | `fn(): number` | the logical processors available to the process |
+| `std::os::host_name` | `fn(): Result<string, Error>` | the machine's name |
+| `std::os::user_name` | `fn(): Result<string, Error>` | the user the process runs as |
+| `std::os::exec_path` | `fn(): Result<string, Error>` | the executable the host started for this process |
+| `std::os::cpu_count` | `fn(): number` | the logical processors available to the process |
 
-- `pid`, `platform`, `arch`, and `cpuCount` are total: every process has an
+- `pid`, `platform`, `arch`, and `cpu_count` are total: every process has an
   id, a running program is always on one OS family and one CPU architecture,
   and a host always presents at least one execution context. They never
-  return `Result` and never `null`, and `cpuCount` is never `0`.
+  return `Result` and never `null`, and `cpu_count` is never `0`.
 - `pid`, `platform`, and `arch` are drawn from the host and do not change
-  during the process's lifetime. `hostName` and `userName` are `Err` when
+  during the process's lifetime. `host_name` and `user_name` are `Err` when
   the host will not say — no name configured, no account behind the process,
   or the reading refused.
 - `platform` is the host's OS-family constant — `"linux"`, `"macos"`,
@@ -154,11 +154,11 @@ match std::os::homeDir() {
   program treats a value it does not recognize as an opaque string.
 - `arch` is the host's CPU-architecture constant — `"x86_64"`, `"aarch64"`,
   and whatever else the host defines — with the same open-list rule.
-- `hostName` and `userName` are opaque strings in the same sense: a program
-  compares or prints them, never parses them. `cpuCount` is a capacity, not
+- `host_name` and `user_name` are opaque strings in the same sense: a program
+  compares or prints them, never parses them. `cpu_count` is a capacity, not
   a reservation — a program sizes work with it and does not assume the
   processors stay idle for it.
-- `execPath` names where the program lives: an absolute path with symbolic
+- `exec_path` names where the program lives: an absolute path with symbolic
   links resolved, as [`std::fs::realpath`](fs.md#resolving-a-path) resolves
   them, so it names the executable file itself — for a compiled program the
   program, for one run by an interpreter the interpreter. It is how a tool
@@ -171,9 +171,9 @@ match std::os::homeDir() {
 print(std::os::pid())              // runs: the process id, e.g. 12345
 print(std::os::platform())         // runs: "linux" on this host
 print(std::os::arch())             // runs: "x86_64" on this host
-print(std::os::cpuCount())         // runs: e.g. 8 — at least 1 on any host
+print(std::os::cpu_count())         // runs: e.g. 8 — at least 1 on any host
 
-match std::os::hostName() {
+match std::os::host_name() {
   Result::Ok(name) => std::io::println(name)   // runs: the machine's name
   Result::Err(e) => std::io::eprintln(e.message)
 }
@@ -183,8 +183,8 @@ match std::os::hostName() {
 
 | Kind | Members |
 |------|---------|
-| Fallible (`Result`) | `getenv` (value not valid UTF-8); `setenv` (empty name, `=` in name, NUL in name or value); `unsetenv` (empty name, `=` in name, NUL in name); `cwd` (host error); `chdir` (path not enterable); `homeDir` (variable unset, empty, or unreadable); `hostName`, `userName` (host error); `execPath` (host will not report the executable) |
-| Total | `pid`, `platform`, `arch`, `tmpDir`, `cpuCount` |
+| Fallible (`Result`) | `getenv` (value not valid UTF-8); `setenv` (empty name, `=` in name, NUL in name or value); `unsetenv` (empty name, `=` in name, NUL in name); `cwd` (host error); `chdir` (path not enterable); `home_dir` (variable unset, empty, or unreadable); `host_name`, `user_name` (host error); `exec_path` (host will not report the executable) |
+| Total | `pid`, `platform`, `arch`, `tmp_dir`, `cpu_count` |
 | Absence | `getenv` → `Ok(null)` when the variable is unset — the `std::os` row of [`README.md`](README.md) § 5.2 |
 | Runtime failure | none |
 
@@ -201,15 +201,15 @@ std::os::unsetenv("A")            // ok — and now `getenv("A")` is Ok(null)
 std::os::pid()                    // ok: number
 std::os::platform()               // ok: string
 std::os::chdir("/tmp")            // ok
-std::os::tmpDir()                 // ok: string
-std::os::homeDir()                // ok: Result<string, Error>
-std::os::execPath()               // ok: Result<string, Error> — where this program lives
-std::os::cpuCount()               // ok: number — at least 1
+std::os::tmp_dir()                 // ok: string
+std::os::home_dir()                // ok: Result<string, Error>
+std::os::exec_path()               // ok: Result<string, Error> — where this program lives
+std::os::cpu_count()               // ok: number — at least 1
 std::os::getenv()                 // error[E0207]: expected 1 argument, found 0
 std::os::setenv(1, "x")           // error[E0202]: expected `string`, found `int`
 std::os::chdir(true)              // error[E0202]: expected `string`, found `bool`
 std::os::arch("x")                // error[E0207]: expected 0 arguments, found 1
-std::os::execPath(0)              // error[E0207]: expected 0 arguments, found 1
+std::os::exec_path(0)              // error[E0207]: expected 0 arguments, found 1
 Os::cwd()                         // error[E0607]: `Os` lives under `std`: use `std::os::cwd`
 std::os::environ()                // error[E0601]: no member `environ`
 ```

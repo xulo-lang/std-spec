@@ -17,7 +17,7 @@ path needs no import:
 ```xulo
 std::math::floor(3.7)                  // ok: 3
 std::math::PI                          // ok: an ordinary float value
-print(std::math::toFixed(3.14159, 2))  // ok: 3.14
+print(std::math::to_fixed(3.14159, 2))  // ok: 3.14
 ```
 
 Import forms are the six of [`README.md`](README.md) § 2.2:
@@ -26,7 +26,7 @@ Import forms are the six of [`README.md`](README.md) § 2.2:
 use std::math::*;               // the constants and every function
 use std::math as m;
 m::sqrt(2.25)                   // ok: 1.5
-use std::math::{floor, toFixed};
+use std::math::{floor, to_fixed};
 ```
 
 ## Constants
@@ -44,7 +44,7 @@ any other. `str` and interpolation render them as `NaN` and `Infinity`
 (`-Infinity` when negative), and a negative zero prints as `0`.
 
 ```xulo
-let halfPi = std::math::PI / 2        // ok
+let half_pi = std::math::PI / 2        // ok
 let big = std::math::INFINITY         // ok: Infinity
 let nope = std::math::NAN             // ok: NaN — and nope != nope is true
 ```
@@ -130,37 +130,37 @@ let huge = std::math::floor(1e308)     // runtime failure: outside int's range
 
 | Member | Signature | Meaning |
 |--------|-----------|---------|
-| `std::math::wrappingAdd` | `fn(a: int, b: int): int` | `a + b` modulo 2⁶⁴, as two's complement |
-| `std::math::wrappingSub` | `fn(a: int, b: int): int` | `a − b` modulo 2⁶⁴, as two's complement |
-| `std::math::wrappingMul` | `fn(a: int, b: int): int` | `a × b` modulo 2⁶⁴, as two's complement |
-| `std::math::popCount` | `fn(x: int): int` | the number of 1 bits in `x` |
-| `std::math::countLeadingZeros` | `fn(x: int): int` | leading 0 bits — 64 when `x` is 0 |
-| `std::math::countTrailingZeros` | `fn(x: int): int` | trailing 0 bits — 64 when `x` is 0 |
-| `std::math::rotateLeft` | `fn(x: int, amount: u64): int` | `x` rotated left by `amount` modulo 64 |
-| `std::math::rotateRight` | `fn(x: int, amount: u64): int` | `x` rotated right by `amount` modulo 64 |
+| `std::math::wrapping_add` | `fn(a: int, b: int): int` | `a + b` modulo 2⁶⁴, as two's complement |
+| `std::math::wrapping_sub` | `fn(a: int, b: int): int` | `a − b` modulo 2⁶⁴, as two's complement |
+| `std::math::wrapping_mul` | `fn(a: int, b: int): int` | `a × b` modulo 2⁶⁴, as two's complement |
+| `std::math::pop_count` | `fn(x: int): int` | the number of 1 bits in `x` |
+| `std::math::count_leading_zeros` | `fn(x: int): int` | leading 0 bits — 64 when `x` is 0 |
+| `std::math::count_trailing_zeros` | `fn(x: int): int` | trailing 0 bits — 64 when `x` is 0 |
+| `std::math::rotate_left` | `fn(x: int, amount: u64): int` | `x` rotated left by `amount` modulo 64 |
+| `std::math::rotate_right` | `fn(x: int, amount: u64): int` | `x` rotated right by `amount` modulo 64 |
 
 - The `wrapping*` functions never trap: their result is the unique `int`
   congruent to the given sum, difference, or product modulo 2⁶⁴, taken as
   two's complement, and the operator overflow rule does not apply to them
   (`spec/types/primitive-types.md`).
-- `popCount`, `countLeadingZeros`, and `countTrailingZeros` count bits of the
+- `pop_count`, `count_leading_zeros`, and `count_trailing_zeros` count bits of the
   64-bit two's-complement representation of their argument.
 - The rotations take that same representation and interpret `amount`
   **modulo 64**, so `0` and `64` are the identity and every `u64` is in
   domain — no amount is rejected.
 
 ```xulo
-let maxInt = 9223372036854775807
-print(std::math::wrappingAdd(maxInt, 1))   // runs: -9223372036854775808
-print(std::math::countLeadingZeros(0))     // runs: 64
-print(std::math::rotateLeft(1, 64))        // runs: 1
+let max_int = 9223372036854775807
+print(std::math::wrapping_add(max_int, 1))   // runs: -9223372036854775808
+print(std::math::count_leading_zeros(0))     // runs: 64
+print(std::math::rotate_left(1, 64))        // runs: 1
 ```
 
 ## Formatting
 
 | Member | Signature | Meaning |
 |--------|-----------|---------|
-| `std::math::toFixed` | `fn(x: float, digits: int): string` | the decimal numeral of `x` with exactly `digits` digits after the decimal point |
+| `std::math::to_fixed` | `fn(x: float, digits: int): string` | the decimal numeral of `x` with exactly `digits` digits after the decimal point |
 
 - The result has exactly `digits` fractional digits: trailing zeros are
   kept — a fixed width is the point of the function — and the value is
@@ -176,12 +176,12 @@ print(std::math::rotateLeft(1, 64))        // runs: 1
   formatted directly at the requested width instead of being rounded.
 
 ```xulo
-print(std::math::toFixed(3.14159, 2))   // runs: 3.14
-print(std::math::toFixed(2.5, 0))       // runs: 3
-print(std::math::toFixed(-2.5, 0))      // runs: -3
-print(std::math::toFixed(3.1, 2))       // runs: 3.10
-print(std::math::toFixed(std::math::NAN, 4))   // runs: NaN
-let bad = std::math::toFixed(1.5, 16)   // runtime failure: digits outside 0 …= 15
+print(std::math::to_fixed(3.14159, 2))   // runs: 3.14
+print(std::math::to_fixed(2.5, 0))       // runs: 3
+print(std::math::to_fixed(-2.5, 0))      // runs: -3
+print(std::math::to_fixed(3.1, 2))       // runs: 3.10
+print(std::math::to_fixed(std::math::NAN, 4))   // runs: NaN
+let bad = std::math::to_fixed(1.5, 16)   // runtime failure: digits outside 0 …= 15
 ```
 
 ## Trigonometric functions
@@ -238,28 +238,28 @@ the only failures are the argument domains § Failure model lists.
 | Member | Signature | Meaning |
 |--------|-----------|---------|
 | `std::math::random` | `fn(): float` | the next pseudo-random value in `[0.0, 1.0)` |
-| `std::math::randomInt` | `fn(lo: int, hi: int): int` | the next pseudo-random integer in `lo … hi`, both ends included |
+| `std::math::random_int` | `fn(lo: int, hi: int): int` | the next pseudo-random integer in `lo … hi`, both ends included |
 
 - The stream starts at a seed drawn from system entropy when the process
   starts; successive calls yield successive values of one generator, each
   53 random bits scaled by 2⁻⁵³ — `0.0` is possible, `1.0` is not.
 - The sequence is **not cryptographic** and not reproducible across runs; do
   not use it for security, salts, or anything that needs a predictable seed.
-- `randomInt` draws from that **same stream**: interleaving it with
+- `random_int` draws from that **same stream**: interleaving it with
   `random` advances one sequence, under the same entropy-drawn seed and the
   same non-cryptographic warning.
 - Every integer in `lo … hi` is **equally likely** — uniform over the
   range, from a full 64-bit draw, so a range of any size up to the entire
   `int` span draws uniformly (the 53-bit scale of `random` does not apply
-  to it). Both ends are included: `randomInt(1, 6)` is a die.
+  to it). Both ends are included: `random_int(1, 6)` is a die.
 - **`lo` greater than `hi` is a runtime failure**
   (`spec/memory-and-runtime.md`) — an empty range has no member to draw.
 
 ```xulo
 let r = std::math::random()
-let inRange = r >= 0.0 && r < 1.0    // ok: always true
-let roll = std::math::randomInt(1, 6)   // ok: an int in 1 …= 6
-std::math::randomInt(6, 1)              // runtime failure: lo greater than hi
+let in_range = r >= 0.0 && r < 1.0    // ok: always true
+let roll = std::math::random_int(1, 6)   // ok: an int in 1 …= 6
+std::math::random_int(6, 1)              // runtime failure: lo greater than hi
 ```
 
 ## Failure model
@@ -267,7 +267,7 @@ std::math::randomInt(6, 1)              // runtime failure: lo greater than hi
 | Kind | Members |
 |------|---------|
 | Total | every member — constants, `abs`/`min`/`max`, `sqrt`/`cbrt`/`pow`/`hypot`/`sign`, the four rounding functions, the eight integer/bit functions, the trigonometric and logarithmic groups, `random` |
-| Runtime failure | `toFixed` with `digits` outside `0 …= 15`; a rounding function whose integral result falls outside `int`'s range; `clamp` and `randomInt` with `lo` greater than `hi` |
+| Runtime failure | `to_fixed` with `digits` outside `0 …= 15`; a rounding function whose integral result falls outside `int`'s range; `clamp` and `random_int` with `lo` greater than `hi` |
 | Fallible (`Result`) | none |
 
 ## Checked call examples

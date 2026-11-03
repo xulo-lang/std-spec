@@ -35,7 +35,7 @@ use std::http::{Request, Response, Server};
 | Type | Shape | Role |
 |------|-------|------|
 | `Server` | methods `addr`, `serve` | a bound, listening server |
-| `Request` | fields `method`, `path`, `query`, `form`, `headers`, `body`, `version`, `remoteAddr`; methods `header`, `queryValue`, `formValue` | one inbound request |
+| `Request` | fields `method`, `path`, `query`, `form`, `headers`, `body`, `version`, `remote_addr`; methods `header`, `query_value`, `form_value` | one inbound request |
 | `Response` | fields `status`, `headers`, `body`; static `text`, `json`; method `header` | one outbound response |
 
 - `Request` and `Response` are plain data: every field is public, and a
@@ -53,7 +53,7 @@ use std::http::{Request, Response, Server};
 
 - A body is text in both directions: `Response.body` and `request`'s `body`
   are strings, and a received body is decoded lossily as UTF-8, exactly as
-  [`net.md`](net.md)'s `sockRead` decodes it. Bytes that are not valid text
+  [`net.md`](net.md)'s `sock_read` decodes it. Bytes that are not valid text
   become U+FFFD; they never arrive as an `Err`.
 - There is therefore **no byte-faithful download or upload** in version 0.1:
   fetching an image or an archive yields replacement characters, and
@@ -131,7 +131,7 @@ use std::http::{Request, Response, Server};
 - A response to a `HEAD` request carries no body, whatever its framing
   headers say: the client returns after the headers.
 - The body is decoded **lossily** as UTF-8 exactly as
-  [`net.md`](net.md)'s `sockRead` decodes it — the client is a byte
+  [`net.md`](net.md)'s `sock_read` decodes it — the client is a byte
   stream dressed as a string. `Content-Encoding` is not decoded and no
   `Accept-Encoding` is sent, so a compressed body arrives as replacement
   characters.
@@ -192,7 +192,7 @@ use std::http::{Request, Response, Server};
     nothing after it, the query is the empty list. The target must start
     with `/` (`400` otherwise), and percent escapes are decoded as
     [URLs](#urls) describes;
-  - `remoteAddr` is the peer's `"ip:port"`.
+  - `remote_addr` is the peer's `"ip:port"`.
 
   The error answers — `400`, `413`, `417`, `431`, `501`, `505` — carry an
   empty body, the status alone, and close the connection; the handler is
@@ -227,9 +227,9 @@ fn route(req: std::http::Request): std::http::Response {
   } else if req.method == "POST" && req.path == "/echo" {
     std::http::Response.text(req.body, 201)
   } else if req.method == "GET" && req.path == "/greet" {
-    std::http::Response.text("hello, " + (req.queryValue("name") ?? "stranger"))
+    std::http::Response.text("hello, " + (req.query_value("name") ?? "stranger"))
   } else if req.method == "POST" && req.path == "/greet" {
-    std::http::Response.text("hello, " + (req.formValue("name") ?? "stranger"))
+    std::http::Response.text("hello, " + (req.form_value("name") ?? "stranger"))
   } else {
     std::http::Response.text("not found", 404)
   }
@@ -305,8 +305,8 @@ On the server side, a request's decoded query and form are data:
 ```xulo
 req.path                     // runs: /search
 req.query                    // runs: [{ name: "q", value: "xulo" }, …]
-req.queryValue("q")          // runs: xulo
-req.formValue("name")        // runs: xulo — decoded only for a form body
+req.query_value("q")          // runs: xulo
+req.form_value("name")        // runs: xulo — decoded only for a form body
 req.header("user-agent")     // runs: null when the client sent none
 ```
 
@@ -326,7 +326,7 @@ req.header("user-agent")     // runs: null when the client sent none
 | Kind | Members |
 |------|---------|
 | Fallible (`Result`) | `fetch`, `request`, `listen`, `Server::addr`, `Server::serve`, `Response::json` |
-| Absence (`string?`) | `Request::header`, `Request::queryValue`, `Request::formValue`, `Response::header` — `null` when absent |
+| Absence (`string?`) | `Request::header`, `Request::query_value`, `Request::form_value`, `Response::header` — `null` when absent |
 | Total | `Response::text`; construction and field reads of `Request` and `Response` |
 | Runtime failure | none — a handler's out-of-range status is sent as `500` |
 

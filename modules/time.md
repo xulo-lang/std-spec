@@ -5,14 +5,14 @@ constants and no types — two wall-clock readings, two monotonic readings,
 `sleep`, the one member of the whole library that returns a task, and five
 members that render a timestamp as ISO 8601 text, read one back, and expose
 its date fields. The readings and the calendar are total; `parse` is fallible
-and `format` and `fromParts` state argument domains (Failure model). The
+and `format` and `from_parts` state argument domains (Failure model). The
 contract is host-independent ([`README.md`](README.md) § 5.5): the readings
 come from the host, but the units, the epoch, the monotonicity guarantee, and
 the UTC calendar are fixed here — the same timestamp renders, parses, and
 decomposes identically on every machine.
 
 Units are milliseconds for `now`, `monotonic`, and `sleep`, and nanoseconds
-for the members whose name ends in `Nanos`; the unit is part of each member's
+for the members whose name ends in `_nanos`; the unit is part of each member's
 meaning, never a type name ([`README.md`](README.md) § 5.4).
 
 This module is the former prelude `Time` namespace moved under `std`; the
@@ -39,9 +39,9 @@ use std::time::{now, sleep};
 | Member | Signature | Meaning |
 |--------|-----------|---------|
 | `std::time::now` | `fn(): u64` | milliseconds since the Unix epoch (wall clock) |
-| `std::time::nowNanos` | `fn(): u64` | nanoseconds since the Unix epoch (wall clock) |
+| `std::time::now_nanos` | `fn(): u64` | nanoseconds since the Unix epoch (wall clock) |
 
-- `now` and `nowNanos` read the **wall clock**: the count of milliseconds or
+- `now` and `now_nanos` read the **wall clock**: the count of milliseconds or
   nanoseconds that has elapsed since 1970-01-01T00:00:00Z. They are the right
   choice for timestamps — the time of day a record was written, the stamp in
   a log line — and the wrong choice for measuring how long something took: a
@@ -52,8 +52,8 @@ use std::time::{now, sleep};
   reading from such a host is indistinguishable from the epoch itself.
 
 ```xulo
-let stampMs = std::time::now()          // ok: a wall-clock timestamp
-let stampNs = std::time::nowNanos()     // ok: the same reading in nanoseconds
+let stamp_ms = std::time::now()          // ok: a wall-clock timestamp
+let stamp_ns = std::time::now_nanos()     // ok: the same reading in nanoseconds
 ```
 
 ## Monotonic clock
@@ -61,9 +61,9 @@ let stampNs = std::time::nowNanos()     // ok: the same reading in nanoseconds
 | Member | Signature | Meaning |
 |--------|-----------|---------|
 | `std::time::monotonic` | `fn(): u64` | milliseconds on the monotonic clock |
-| `std::time::monotonicNanos` | `fn(): u64` | nanoseconds on the monotonic clock |
+| `std::time::monotonic_nanos` | `fn(): u64` | nanoseconds on the monotonic clock |
 
-- `monotonic` and `monotonicNanos` read a clock that **never runs backwards**
+- `monotonic` and `monotonic_nanos` read a clock that **never runs backwards**
   and is unaffected by wall-clock changes: a reading taken after another one
   is greater than or equal to it, always.
 - The origin of the monotonic clock is **arbitrary** — it is fixed once per
@@ -74,9 +74,9 @@ let stampNs = std::time::nowNanos()     // ok: the same reading in nanoseconds
   difference is the unit of the members it was taken with.
 
 ```xulo
-let start = std::time::monotonicNanos()     // ok
+let start = std::time::monotonic_nanos()     // ok
 // ... work ...
-let end = std::time::monotonicNanos()       // ok
+let end = std::time::monotonic_nanos()       // ok
 let elapsed = end - start                   // ok: nanoseconds elapsed, never negative
 ```
 
@@ -134,7 +134,7 @@ does not parse.
 | `std::time::format` | `fn(ms: u64): string` | the timestamp as ISO 8601 UTC — `2026-10-26T12:34:56.789Z` |
 | `std::time::parse` | `fn(text: string): Result<u64, Error>` | the timestamp an ISO 8601 UTC string denotes |
 | `std::time::parts` | `fn(ms: u64): { year: int, month: int, day: int, hour: int, minute: int, second: int, millisecond: int }` | the UTC date and time fields of a timestamp |
-| `std::time::fromParts` | `fn(year: int, month: int, day: int, hour: int = 0, minute: int = 0, second: int = 0, millisecond: int = 0): u64` | the timestamp those UTC fields denote |
+| `std::time::from_parts` | `fn(year: int, month: int, day: int, hour: int = 0, minute: int = 0, second: int = 0, millisecond: int = 0): u64` | the timestamp those UTC fields denote |
 | `std::time::weekday` | `fn(ms: u64): int` | the day of the week — `0` Sunday … `6` Saturday |
 
 - `format` emits one fixed layout: four-digit year, two-digit month, day,
@@ -142,7 +142,7 @@ does not parse.
   `Z` — no templates and no locale. A `ms` above the domain — past
   `9999-12-31T23:59:59.999Z` — is a runtime failure
   (`spec/memory-and-runtime.md`), the argument-domain shape of
-  `std::math::toFixed`'s `digits`; every other `u64` renders.
+  `std::math::to_fixed`'s `digits`; every other `u64` renders.
 - `parse` accepts the layout `format` emits, plus two relaxations: `T` or a
   single space as the date/time separator, and a fraction of 1 to 9 digits
   (truncated to the millisecond — the output's precision). Field ranges are
@@ -157,17 +157,17 @@ does not parse.
   timestamp `format` refuses still decomposes — the `year` field is an
   `int`, large enough for any value the clock can return. The fields are
   UTC: `month` runs `1 …= 12`, and `millisecond` runs `0 …= 999`.
-- `fromParts` inverts `parts`: the fields must name a real instant inside
+- `from_parts` inverts `parts`: the fields must name a real instant inside
   the domain — a month of `1 …= 12`, a day within that month (leap years
   included), `hour` `0 …= 23`, `minute` and `second` `0 …= 59`,
   `millisecond` `0 …= 999`, and a date at or after the Unix epoch. Any
   other field set is a **runtime failure**; the time fields default to `0`,
-  so `fromParts(2026, 10, 26)` is midnight UTC.
+  so `from_parts(2026, 10, 26)` is midnight UTC.
 - `weekday` is total for every `u64`, domain or not: the epoch itself was a
   Thursday, so `weekday(0) == 4`.
 
 ```xulo
-let noon = std::time::fromParts(2026, 10, 26, 12)
+let noon = std::time::from_parts(2026, 10, 26, 12)
 print(std::time::format(noon))              // runs: 2026-10-26T12:00:00.000Z
 match std::time::parse("2026-10-26T12:00:00.000Z") {
     Result::Ok(ms) => print(ms == noon)     // runs: true
@@ -176,7 +176,7 @@ match std::time::parse("2026-10-26T12:00:00.000Z") {
 let f = std::time::parts(noon)
 print(`${f.year}-${f.month}-${f.day}`)      // runs: 2026-10-26
 print(std::time::weekday(noon))             // runs: 1 — a Monday
-std::time::fromParts(2026, 2, 30)           // runtime failure: the calendar has no such date
+std::time::from_parts(2026, 2, 30)           // runtime failure: the calendar has no such date
 std::time::format(253402300800000)          // runtime failure: past 9999-12-31T23:59:59.999Z
 ```
 
@@ -197,17 +197,17 @@ is semantics (§ 5.5, § 5.7), not timings.
 
 | Kind | Members |
 |------|---------|
-| Total | `now`, `nowNanos`, `monotonic`, `monotonicNanos`, `sleep`, `parts`, `weekday` |
+| Total | `now`, `now_nanos`, `monotonic`, `monotonic_nanos`, `sleep`, `parts`, `weekday` |
 | Fallible (`Result`) | `parse` — `Result<u64, Error>`, the built-in error |
-| Runtime failure | `format` with `ms` past `9999-12-31T23:59:59.999Z`; `fromParts` with fields outside the calendar or before the Unix epoch |
+| Runtime failure | `format` with `ms` past `9999-12-31T23:59:59.999Z`; `from_parts` with fields outside the calendar or before the Unix epoch |
 
 The readings, `sleep`, `parts`, and `weekday` cannot fail: there is no
 absence in this module, and `sleep`'s clamping of an oversized delay is a
 settling guarantee, not a failure. `parse` is the module's only fallible
 member, and its `Err` carries the **built-in** `Error` — the default rule,
 with no module error type ([`README.md`](README.md) § 5.1). `format` and
-`fromParts` state argument domains that stop the program when exceeded, the
-same shape as `std::math::toFixed`'s `digits`. The only check-time error
+`from_parts` state argument domains that stop the program when exceeded, the
+same shape as `std::math::to_fixed`'s `digits`. The only check-time error
 that involves these members is discarding `sleep`'s task in statement
 position (`E0218`), reported by the checker before the program runs, not a
 runtime failure of the member.
@@ -217,10 +217,10 @@ runtime failure of the member.
 ```xulo
 std::time::now()                      // ok
 std::time::now() > 0                  // ok: true on any host after 1970
-std::time::monotonicNanos()           // ok
+std::time::monotonic_nanos()           // ok
 std::time::now(1)                     // error[E0207]: expected 0 arguments, found 1
-std::time::fromParts(2026, 10, 26)    // ok: hour … millisecond default to 0
-std::time::fromParts(2026, 10)        // error[E0207]: expected 3 to 7 arguments, found 2
+std::time::from_parts(2026, 10, 26)    // ok: hour … millisecond default to 0
+std::time::from_parts(2026, 10)        // error[E0207]: expected 3 to 7 arguments, found 2
 std::time::parse(2026)                // error[E0202]: expected `string`, found `int`
 std::time::sleep("100")               // error[E0202]: expected `u64`, found `string`
 async fn ok() {

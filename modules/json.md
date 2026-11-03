@@ -77,11 +77,11 @@ use std::json::{parse, stringify, valid};
   hashable element type and the same kind of choice that sorts object
   members (§ 5.7). The order is on the text, not the value: a set of
   numbers orders by their digits — `10` before `2`. `parse` reads a
-  `list`; `setFromList` restores the set — its elements are distinct, so
+  `list`; `Set::from_list` restores the set — its elements are distinct, so
   the trip keeps every one.
 
 ```xulo
-std::json::stringify(setFromList(["b", "a"]))   // runs: ["a","b"] — ordered by element text
+std::json::stringify(Set::from_list(["b", "a"]))   // runs: ["a","b"] — ordered by element text
 std::json::stringify(Map<int, string>{1: "x"})  // runs: {"1":"x"} — the key textified
 std::json::stringify((1, "x"))                  // runs: [1,"x"] — the tuple's elements
 match std::json::parse("{\"b\": 2, \"a\": 1}") {
@@ -210,11 +210,11 @@ included.** `pub` is a compile-time name rule (the language specification,
 `stringify` carries its fields and nothing that could mark one private:
 
 ```xulo
-struct User { name: string, age: int, passwordHash: string }
+struct User { name: string, age: int, password_hash: string }
 
-let alice = User(name: "Alice", age: 30, passwordHash: "5e88…")
+let alice = User(name: "Alice", age: 30, password_hash: "5e88…")
 std::json::stringify(alice)
-// runs: {"age":30,"name":"Alice","passwordHash":"5e88…"} — every field, private included
+// runs: {"age":30,"name":"Alice","password_hash":"5e88…"} — every field, private included
 ```
 
 Two explicit roads lead out of that default when a program wants a
@@ -228,25 +228,25 @@ std::json::stringify({ name: alice.name, age: alice.age })
 // runs: {"age":30,"name":"Alice"}
 ```
 
-- **Or implement `toJson`.** A struct MAY declare an inherent method named
-  `toJson` that yields the value to serialize — an ordinary method, `pub`
+- **Or implement `to_json`.** A struct MAY declare an inherent method named
+  `to_json` that yields the value to serialize — an ordinary method, `pub`
   when callers live in another module — and the program passes its result
   on:
 
 ```xulo
 impl User {
-  pub fn toJson(self): any { ({ name: self.name, age: self.age }) }
+  pub fn to_json(self): any { ({ name: self.name, age: self.age }) }
 }
 
-std::json::stringify(alice.toJson())        // the text of that object
-std::json::stringify(alice.toJson(), 2)     // the same members, indented
+std::json::stringify(alice.to_json())        // the text of that object
+std::json::stringify(alice.to_json(), 2)     // the same members, indented
 ```
 
-Neither road is wired into `stringify`: **the program calls `toJson`,
+Neither road is wired into `stringify`: **the program calls `to_json`,
 never `stringify`** — method resolution is module-scoped (the language
 specification, `traits` chapter), so a member inside `std` cannot see a
 program's `impl`, and nothing in `std::json` looks for the name. What
-`toJson` yields obeys `stringify`'s existing rules: a `NaN`, a closure, or
+`to_json` yields obeys `stringify`'s existing rules: a `NaN`, a closure, or
 a cycle inside it arrives as the same `Err` as anywhere else.
 
 The way back is manual by the same design: `parse` yields the plain object
@@ -294,7 +294,7 @@ std::json::valid("")               // runs: false — an empty document
   types are the one exception to the first half: a struct, a tuple, or a
   set comes back as its plain shape — object, list, list — and a map with
   textified keys comes back with `string` keys; the constructor or
-  `setFromList` restores the type ([`Structs`](#structs)). The **text**
+  `Set::from_list` restores the type ([`Structs`](#structs)). The **text**
   still stabilizes in every case.
 - **Indentation is not part of the round trip.** `parse` does not see it,
   and `stringify` with `indent` omitted always returns the compact text —

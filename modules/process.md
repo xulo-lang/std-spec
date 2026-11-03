@@ -88,7 +88,7 @@ std::process::exit(256 + 1)        // runs: on Unix, terminates with status 1 �
 
 ```xulo
 let argv = std::process::args()   // ok: List<string> — argv[0] is the program path
-let n = listSize(argv)            // ok: at least 1; the exact vector is host-dependent
+let n = argv.len                  // ok: at least 1; the exact vector is host-dependent
 ```
 
 ## Child capture
@@ -140,7 +140,7 @@ What `exec` does not have is the shell: a pipeline or a redirection is a
   form does not mean an empty stdin.
 - **stdout and stderr** are always captured, both decoded lossily into
   strings: bytes that are not valid UTF-8 become U+FFFD replacement
-  characters — the same policy [`net.md`](net.md)'s `sockRead` shares. The
+  characters — the same policy [`net.md`](net.md)'s `sock_read` shares. The
   child inherits this process's environment, so variables set through
   `std::os::setenv` are visible to it ([`os.md`](os.md)).
 - **`code`** is the child's exit status; `-1` when a signal killed the

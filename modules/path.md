@@ -50,7 +50,7 @@ bind the whole module:
 
 | Member | Signature | Meaning |
 |--------|-----------|---------|
-| `std::path::isAbsolute` | `fn(path: string): bool` | whether `path` names an absolute location |
+| `std::path::is_absolute` | `fn(path: string): bool` | whether `path` names an absolute location |
 
 - The test is the first character alone: a leading `/` — the one separator
   this module recognizes — makes the path absolute, and nothing else can:
@@ -59,9 +59,9 @@ bind the whole module:
   POSIX syntax, not "exists" or "resolves" (Domain's third rule).
 
 ```xulo
-print(std::path::isAbsolute("/etc/hosts"))   // runs: true
-print(std::path::isAbsolute("etc/hosts"))    // runs: false
-let bare = std::path::isAbsolute("")         // ok: false
+print(std::path::is_absolute("/etc/hosts"))   // runs: true
+print(std::path::is_absolute("etc/hosts"))    // runs: false
+let bare = std::path::is_absolute("")         // ok: false
 ```
 
 ## Joining
@@ -128,7 +128,7 @@ print(`${s.dir} ${s.base} ${s.ext}`)      // runs: /var/log app.log .log
 |--------|-----------|---------|
 | `std::path::ext` | `fn(path: string): string` | the extension of the final component, including the dot |
 | `std::path::stem` | `fn(path: string): string` | the final component without its extension |
-| `std::path::withExt` | `fn(path: string, ext: string): string` | `path` with the final component's extension replaced |
+| `std::path::with_ext` | `fn(path: string, ext: string): string` | `path` with the final component's extension replaced |
 
 - The result **includes the dot**: `"a.txt"` yields `".txt"`, and only the
   last dot counts, so `"a.tar.gz"` yields `".gz"`.
@@ -143,15 +143,15 @@ print(`${s.dir} ${s.base} ${s.ext}`)      // runs: /var/log app.log .log
   leading dot being a marker, not an extension — `".bashrc"` →
   `".bashrc"`. When `ext` is `""` nothing is removed, so `"file."` →
   `"file."`.
-- `withExt` replaces that extension: the argument takes **one optional
+- `with_ext` replaces that extension: the argument takes **one optional
   leading dot** — `".md"` and `"md"` name the same extension — and the new
   final component is the `stem` plus the extension (the `stem` alone when
   the extension argument is empty, which is how an extension is removed:
-  `withExt("report.txt", "")` → `"report"`). A name with no extension
+  `with_ext("report.txt", "")` → `"report"`). A name with no extension
   gains one (`"notes"` → `"notes.md"`), hidden files included
   (`".bashrc"` → `".bashrc.md"`). Only the final component changes: the
   parent directories are untouched, no other normalization happens, and
-  trailing slashes follow the module rule (`withExt("dir.d/", ".txt")` →
+  trailing slashes follow the module rule (`with_ext("dir.d/", ".txt")` →
   `"dir.txt"`).
 
 ```xulo
@@ -159,14 +159,14 @@ print(std::path::ext("report.pdf"))        // runs: .pdf
 print(std::path::ext("archive.tar.gz"))    // runs: .gz
 let hidden = std::path::ext(".bashrc")     // ok: ""
 let trailing = std::path::ext("file.")     // ok: ""
-let dirDot = std::path::ext("dir.d/f")     // ok: ""
+let dir_dot = std::path::ext("dir.d/f")     // ok: ""
 print(std::path::ext("dir.d/"))            // runs: .d
 print(std::path::stem("archive.tar.gz"))   // runs: archive.tar
-let hiddenStem = std::path::stem(".bashrc")   // ok: .bashrc
-print(std::path::withExt("report.txt", ".md"))   // runs: report.md
-print(std::path::withExt("report.txt", "md"))    // runs: report.md — the dot is optional
-print(std::path::withExt("report.txt", ""))      // runs: report — the extension is removed
-let added = std::path::withExt("notes", ".md")   // ok: notes.md
+let hidden_stem = std::path::stem(".bashrc")   // ok: .bashrc
+print(std::path::with_ext("report.txt", ".md"))   // runs: report.md
+print(std::path::with_ext("report.txt", "md"))    // runs: report.md — the dot is optional
+print(std::path::with_ext("report.txt", ""))      // runs: report — the extension is removed
+let added = std::path::with_ext("notes", ".md")   // ok: notes.md
 ```
 
 ## Normalization
@@ -252,7 +252,7 @@ fixed for its input and identical on every host
 
 | Kind | Members |
 |------|---------|
-| Total | every member except `relative` — `isAbsolute`, `join`, `dirname`, `basename`, `split`, `ext`, `stem`, `withExt`, `normalize` |
+| Total | every member except `relative` — `is_absolute`, `join`, `dirname`, `basename`, `split`, `ext`, `stem`, `with_ext`, `normalize` |
 | Runtime failure | none |
 | Fallible (`Result`) | none |
 | Absence (`null`) | `relative` when no relative path exists — one side absolute and the other relative, or `from` would climb above the shared anchor |
@@ -263,7 +263,7 @@ fixed for its input and identical on every host
 std::path::join("a", "b")                 // ok
 std::path::join("a")                      // error[E0207]: expected 2 arguments, found 1
 std::path::join("a", 1)                   // error[E0202]: expected `string`, found `int`
-std::path::withExt("a")                   // error[E0207]: expected 2 arguments, found 1
+std::path::with_ext("a")                   // error[E0207]: expected 2 arguments, found 1
 std::path::stem(1)                        // error[E0202]: expected `string`, found `int`
 std::path::relative("/a", "b")            // ok: null — the two frames do not share one
 std::path::relative("/a/b")               // error[E0207]: expected 2 arguments, found 1

@@ -136,7 +136,7 @@ struct Money { cents: int }
 
 impl Display for Money {
   fn display(self, format: Format): string {
-    std::math::toFixed(self.cents / 100.0, format.precision ?? 2)
+    std::math::to_fixed(self.cents / 100.0, format.precision ?? 2)
   }
 }
 
@@ -189,7 +189,7 @@ std::fmt::format("%x", [small])                 // ok: "ff"
 | `%e` `%E` | `number`, `f32`, `f64` | scientific — one digit, `.`, `precision` digits, then `e` or `E` and a signed exponent of at least two digits (default 6) |
 | `%g` `%G` | `number`, `f32`, `f64` | the shorter of the `%f` and `%e` forms, `%G` spelling the exponent with `E` |
 
-- Rounding is the `std::math::toFixed` rule — `precision` places, halfway
+- Rounding is the `std::math::to_fixed` rule — `precision` places, halfway
   away from zero — and its overflow note applies to `%f` unchanged
   ([`math.md`](math.md)). An integer operand is converted to the `float`
   nearest its value — exact within ±2⁵³, ties to even beyond — and an `f32`
@@ -279,7 +279,7 @@ print(std::fmt::format("%.3s", [[1, 2, 3]]))   // runs: [1,   — a table render
 A template is the program's own text and the arguments are the program's own
 values, so every failure here is an argument domain — the class § 5.3 of
 [`README.md`](README.md) leaves as a runtime failure, the shape
-`std::math::toFixed`'s `digits` already takes. The module never meets the
+`std::math::to_fixed`'s `digits` already takes. The module never meets the
 outside world, so there is no failure for § 5.1's `Result` to carry.
 
 ## Checked call examples

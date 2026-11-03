@@ -59,7 +59,7 @@ surface, the byte-level `std::net` and `std::http` bodies — is a further step,
 and the platform layer it needs is not a language change. It needs a
 **native platform layer**: an implementation-registered package, resolved the
 way `std` is today, whose members move bytes between Xulo and the host —
-`open`, `readInto`, `write`, `close`, and their socket twins, over `List<u8>`
+`open`, `read_into`, `write`, `close`, and their socket twins, over `List<u8>`
 buffers and opaque `number` handles. User-level FFI cannot serve: `Ptr` is
 never dereferenced and never converts to or from an integer
 ([`ffi.md`](xulo-spec/ffi.md) § Ptr), and strings, lists, and buffers are
@@ -84,7 +84,7 @@ implemented:
 | `std::http` byte-faithful bodies — binary download/upload, file transfer, streaming bodies (native platform layer + `std::fs` handles + `std::net` bytes) | design direction (Go `io.Copy`, Node streams) | not specified |
 | `std::fs` object surface — `File`, `Path`, `FileMode` | website `standard-library-net-fs` | not specified |
 | `std::fs` extras — `lstat`, link metadata | design direction (POSIX `lstat`) | not specified |
-| `std::fs` streaming walk — `walkIter` | design direction (Go `walkDir`, language iterators) | not specified |
+| `std::fs` streaming walk — `walk_iter` | design direction (Go `walkDir`, language iterators) | not specified |
 | `std::io` generic surface — `Read`/`Write` traits over streams, files, sockets | design direction (Rust `std::io`, Go `io.Reader`) | not specified |
 | `std::io` / `std::net` byte surface — byte-level stdin and socket reads | design direction (Rust `Vec<u8>`, Go `[]byte`) | not specified |
 | `std::math` extras — `Random`, `Matrix`, `Vector`, `Complex` | website `standard-library-net-fs` | not specified |
@@ -139,7 +139,7 @@ work for the compiler, not for this document):
 | Numeric signatures — `float` results (the constants, `sqrt`, `sin`, …), `int` results (`floor`, `ceil`, `round`, `trunc`), `u64` (`sleep`, the clocks, the `rotate*` amount) | as the chapters write them | the checker reports `number` for every numeric result and checks numeric parameters against `number` (the loose numeric layer); the compiled path puts the four rounding results in an F64 slot rather than an integer one |
 | Head and member diagnostics — capital head (`Json::parse(…)`), unknown member (`std::json::dumps(…)`), called constant (`std::math::PI(…)`) | `E0607` / `E0601` / `E0204` | reported as the coarse fallback `E0003`, without the fine-grained code |
 | `std::regex` reachability — unimported types in annotation position, aliased types (`use std::regex::RegExp as R;` then `R::compile(…)`) | all three types resolve in annotations without an import; an alias behaves like any other binding; the diagnostics the tables state | only `RegexMatch` resolves unimported; an aliased type does not answer `::compile`; regex path rejections report the coarse `E0003` |
-| `std::net` member spelling | `tcpListen` `tcpConnect` `tcpAccept` `sockRead` `sockWrite` `sockShutdown` `sockShutdownWrite` `sockClose` `sockLocalAddr` `sockPeerAddr` (lowerCamelCase, per [`names.md`](xulo-spec/names.md)) | still registered as `tcp_listen` etc. (snake_case); rename before 1.0 |
+| `std::net` member spelling | `tcp_listen` `tcp_connect` `tcp_accept` `sock_read` `sock_write` `sock_shutdown` `sock_shutdown_write` `sock_close` `sock_local_addr` `sock_peer_addr` (snake_case, per [`names.md`](xulo-spec/names.md)) | matches — the registration already uses these spellings |
 
 ## 2. Status and Versioning
 
@@ -233,11 +233,11 @@ normative for the whole specification.
 | **blocking member** | A member whose call does not return until the host operation completes — in version 0.1 the `std::io` readers, the `std::net` openers and reads/writes, the `std::http` client calls and server loop (`fetch`, `request`, `Server::serve`), and the `std::process` child waiters (`run`, `exec`, `Command::run`, `Child::wait`). See [`modules/README.md`](modules/README.md). |
 | **face** | The set of names a module's glob binds — `use std::math::*` binds the face. A module may export a name that its face withholds (see `std::io`). |
 | **fallible** | Of a member that returns `Result<T, Error>`: its failure is a value in the `Err` slot. |
-| **handle** | An opaque numeric name for a host resource — a socket — issued only by a `std::net` opener, accepted only by `std::net` members, and invalid after `sockClose`. |
+| **handle** | An opaque numeric name for a host resource — a socket — issued only by a `std::net` opener, accepted only by `std::net` members, and invalid after `sock_close`. |
 | **member** | One constant or function of a module, selected with `::` (`std::math::PI`, `std::fs::read(…)`), or bound by a `use`. |
 | **std root** | The built-in namespace head `std`: provided by the compiler, backed by no file, no manifest, and no package initialization. |
 | **total** | Of a member that never fails: it returns its declared type directly, with no `Result` and no absence, for every admissible argument. |
-| **runtime failure** | A condition that stops the program — a panic, as `spec/memory-and-runtime.md` defines it. This specification uses it only for argument domains a chapter states explicitly (for example `std::math::toFixed`'s `digits`). |
+| **runtime failure** | A condition that stops the program — a panic, as `spec/memory-and-runtime.md` defines it. This specification uses it only for argument domains a chapter states explicitly (for example `std::math::to_fixed`'s `digits`). |
 
 ## 6. Relationship to Other Documents
 
@@ -269,7 +269,7 @@ language spec        normative for the language around std
 | `use json as JSON;`, `use regex::{…}` (bare heads) | `use std::json as JSON;`, `use std::regex::{…}` — bare module heads are rejected |
 | `Math::PI`, `Time::now()` in scope without `use` | `std::math::PI`, `std::time::now()` — qualified through `std`, or imported |
 | `JSONError` enum, `JSON::parse<T>`, `parse_async` | failures are `Result<_, Error>`; there is no `JSONError` and no `parse_async` |
-| clocks return `u64`, `Time::now_nanos` casing | `u64`, lowerCamelCase `nowNanos` (agrees on type, differs on namespace) |
+| clocks return `u64`, `Time::now_nanos` casing | `u64`, `std::time::now_nanos` (agrees on type and spelling, differs on namespace) |
 | `File`, `HashMap`, `Random`, … | roadmap candidates only (§ 1.2) |
 | `string.replace` / `string.split` availability unstated | specified in [`modules/regex.md`](modules/regex.md) |
 

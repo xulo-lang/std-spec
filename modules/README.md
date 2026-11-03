@@ -144,13 +144,13 @@ of names its glob binds — coincides with the exports for eleven modules, and
 
 | Module | Constants | Functions | Types |
 |--------|-----------|-----------|-------|
-| `std::math` | `PI` `E` `TAU` `INFINITY` `NAN` | `abs` `min` `max` `sign` `sqrt` `cbrt` `pow` `hypot` `clamp` `floor` `ceil` `round` `trunc` `toFixed` `sin` `cos` `tan` `asin` `acos` `atan` `atan2` `log` `log2` `log10` `log1p` `exp` `expm1` `random` `randomInt` `wrappingAdd` `wrappingSub` `wrappingMul` `popCount` `countLeadingZeros` `countTrailingZeros` `rotateLeft` `rotateRight` | — |
-| `std::time` | — | `now` `nowNanos` `monotonic` `monotonicNanos` `sleep` `format` `parse` `parts` `fromParts` `weekday` | — |
-| `std::io` | — | `print` `println` `eprint` `eprintln` `flush` `readLine` `read` `readN` `stdinIsTTY` `stdoutIsTTY` | — |
-| `std::fs` | — | `read` `readBytes` `write` `writeBytes` `append` `appendBytes` `createNew` `touch` `setTimes` `setMode` `exists` `realpath` `stat` `copy` `rename` `remove` `mkdir` `readDir` `walk` `removeDir` `tempFile` `tempFileIn` `tempDir` `tempDirIn` | — |
-| `std::path` | — | `isAbsolute` `join` `dirname` `basename` `split` `ext` `stem` `withExt` `normalize` `relative` | — |
-| `std::os` | — | `getenv` `setenv` `unsetenv` `cwd` `chdir` `tmpDir` `homeDir` `pid` `platform` `arch` `hostName` `userName` `execPath` `cpuCount` | — |
-| `std::net` | — | `tcpListen` `tcpAccept` `tcpConnect` `sockRead` `sockWrite` `sockShutdown` `sockShutdownWrite` `sockClose` `sockLocalAddr` `sockPeerAddr` | — |
+| `std::math` | `PI` `E` `TAU` `INFINITY` `NAN` | `abs` `min` `max` `sign` `sqrt` `cbrt` `pow` `hypot` `clamp` `floor` `ceil` `round` `trunc` `to_fixed` `sin` `cos` `tan` `asin` `acos` `atan` `atan2` `log` `log2` `log10` `log1p` `exp` `expm1` `random` `random_int` `wrapping_add` `wrapping_sub` `wrapping_mul` `pop_count` `count_leading_zeros` `count_trailing_zeros` `rotate_left` `rotate_right` | — |
+| `std::time` | — | `now` `now_nanos` `monotonic` `monotonic_nanos` `sleep` `format` `parse` `parts` `from_parts` `weekday` | — |
+| `std::io` | — | `print` `println` `eprint` `eprintln` `flush` `read_line` `read` `read_n` `stdin_is_tty` `stdout_is_tty` | — |
+| `std::fs` | — | `read` `read_bytes` `write` `write_bytes` `append` `append_bytes` `create_new` `touch` `set_times` `set_mode` `exists` `realpath` `stat` `copy` `rename` `remove` `mkdir` `read_dir` `walk` `remove_dir` `temp_file` `temp_file_in` `temp_dir` `temp_dir_in` | — |
+| `std::path` | — | `is_absolute` `join` `dirname` `basename` `split` `ext` `stem` `with_ext` `normalize` `relative` | — |
+| `std::os` | — | `getenv` `setenv` `unsetenv` `cwd` `chdir` `tmp_dir` `home_dir` `pid` `platform` `arch` `host_name` `user_name` `exec_path` `cpu_count` | — |
+| `std::net` | — | `tcp_listen` `tcp_accept` `tcp_connect` `sock_read` `sock_write` `sock_shutdown` `sock_shutdown_write` `sock_close` `sock_local_addr` `sock_peer_addr` | — |
 | `std::http` | — | `fetch` `request` `listen` | `Request` `Response` `Server` |
 | `std::process` | — | `exit` `args` `run` `exec` `launch` | `Command` `Child` |
 | `std::json` | — | `parse` `stringify` `valid` | — |
@@ -168,7 +168,7 @@ path or a namespace alias:
 std::io::print("io: ")           // ok: the flushing write
 use std::io as io;
 io::println("hello stdout")       // ok: same member, aliased
-use std::io::*;                   // ok: eprint eprintln flush readLine read readN stdinIsTTY stdoutIsTTY
+use std::io::*;                   // ok: eprint eprintln flush read_line read read_n stdin_is_tty stdout_is_tty
 // print("hi") after the glob is the prelude intrinsic — different buffering
 // (see io.md), and `use std::io::print;` is error[E0601]
 ```
@@ -187,15 +187,15 @@ function, against the signature this specification gives it:
 - **Arity** is fixed by the signature; too few or too many arguments are
   `E0207`. Nineteen members accept optional trailing arguments, each with
   the range its chapter states: `std::process::run` (1–3), `std::process::exec`
-  (2–4), `std::process::launch` (1–3), `std::net::tcpConnect` (1–2),
-  `std::net::tcpAccept` (1–2), `std::net::sockRead` (2–3),
-  `std::net::sockWrite` (2–3), `std::http::fetch` (1–2),
+  (2–4), `std::process::launch` (1–3), `std::net::tcp_connect` (1–2),
+  `std::net::tcp_accept` (1–2), `std::net::sock_read` (2–3),
+  `std::net::sock_write` (2–3), `std::http::fetch` (1–2),
   `std::http::request` (2–5), `Response::text` (1–2),
   `Response::json` (1–2), `RegExp::compile` (1–2),
-  `std::fs::tempFile` and `std::fs::tempDir` (0–1),
-  `std::fs::tempFileIn` and `std::fs::tempDirIn` (1–2),
+  `std::fs::temp_file` and `std::fs::temp_dir` (0–1),
+  `std::fs::temp_file_in` and `std::fs::temp_dir_in` (1–2),
   `std::json::stringify` (1–2), `std::fmt::format` (1–2),
-  `std::time::fromParts` (3–7). An omitted
+  `std::time::from_parts` (3–7). An omitted
   argument takes the default its chapter states.
 - **Argument types** are the signature's parameter types; a non-assignable
   argument is `E0202`. Literals coerce as the language's coercion table
@@ -249,7 +249,7 @@ runtime failures). Failures arrive in the `Err` slot and are handled by
 `match`, by `?`, or by ignoring the value:
 
 ```xulo
-fn readConfig(path: string): Result<string, Error> {
+fn read_config(path: string): Result<string, Error> {
   match std::fs::read(path) {
     Result::Ok(text) => Result::Ok(text)
     Result::Err(e) => Result::Err(e)      // or: std::fs::read(path)?
@@ -272,7 +272,7 @@ message text is never a discriminator — a program or test MUST NOT recover
 a class by matching it ([`../README.md`](../README.md) § 3.5, rule 5). A
 caller branches only on what a member offers as data: a `code`, an absence
 (`Ok(null)`), a probe such as `exists`/`stat`, or a byte twin such as
-`readBytes`. A member that must let callers recover a class carries a
+`read_bytes`. A member that must let callers recover a class carries a
 domain error type in the `E` slot instead; that is a deliberate cost,
 because `?` requires the enclosing function's `E` to match and the value
 then does not compose with `Result<_, Error>`
@@ -287,29 +287,29 @@ reports it as `Err`:
 
 | Absence | Member |
 |---------|--------|
-| end of input | `std::io::readLine()` → `null`; `std::io::readN(max)` → `null` |
+| end of input | `std::io::read_line()` → `null`; `std::io::read_n(max)` → `null` |
 | no match | `std::regex::RegExp.find` → `null`; `RegexMatch.group` → `null` for group 0, out of range, a non-participating group, or an unknown name |
 | no relative path | `std::path::relative` → `null` when one side is absolute and the other relative, or when `from` would climb above the shared anchor |
 | variable not set | `std::os::getenv` → `Ok(null)` (set but the operation failed → `Err`) |
-| no header, query, or form value | `std::http::Request.header` / `Request.queryValue` / `Request.formValue` / `Response.header` → `null` |
+| no header, query, or form value | `std::http::Request.header` / `Request.query_value` / `Request.form_value` / `Response.header` → `null` |
 
 ### 5.3 Total, fallible, and runtime failure
 
 - **Total** members return their type directly, for every admissible
   argument — `std::path::join`, `std::math::sqrt`, `std::os::pid`.
 - **Fallible** members return `Result<T, Error>` — `std::fs::read`,
-  `std::net::tcpConnect`, `std::json::parse`.
+  `std::net::tcp_connect`, `std::json::parse`.
 - **Optional** members return `T?`, or `Result<T?, Error>` when they are both.
 - A **runtime failure** — a condition that stops the program, as
   `spec/memory-and-runtime.md` defines it — occurs only where a chapter
-  states the argument domain (for example `std::math::toFixed`'s `digits`
+  states the argument domain (for example `std::math::to_fixed`'s `digits`
   range). Chapters mark those domains explicitly.
 
 ### 5.4 Units
 
 Clocks and delays count in whole units named by the member, never by its
 type: `now`, `monotonic`, and `sleep`'s argument are milliseconds; members
-whose name ends in `Nanos` are nanoseconds; `std::time::now` counts
+whose name ends in `_nanos` are nanoseconds; `std::time::now` counts
 milliseconds since the Unix epoch. A unit is part of a member's documented
 meaning, not part of its type.
 
@@ -329,7 +329,7 @@ chapter says so where it matters.
 
 Every member of version 0.1 is synchronous: the call returns when the host
 operation completes. The members that can wait on the outside world for an
-unbounded time — the `std::io` readers (`readLine`, `read`, `readN`), the `std::net`
+unbounded time — the `std::io` readers (`read_line`, `read`, `read_n`), the `std::net`
 openers and reads/writes, the `std::http` client calls and server loop
 (`fetch`, `request`, `Server::serve`), and the `std::process` child waiters
 (`run`, `exec`, `Command::run`, `Child::wait`) — are the **blocking
@@ -346,7 +346,7 @@ Where a chapter claims it, a conforming implementation produces the same
 result for the same inputs on every host: `std::json`'s output order, every
 `std::fmt` result, every `std::path` member, every `std::regex` match, and
 `std::time`'s calendar
-members (`format`, `parse`, `parts`, `fromParts`, `weekday`) are
+members (`format`, `parse`, `parts`, `from_parts`, `weekday`) are
 deterministic.
 Transcendental `std::math` functions (`sin`, `log`, `exp`, …) delegate to the
 host's math library and MAY differ from another implementation in the last
@@ -357,11 +357,11 @@ members are fixed by their chapters.
 
 Every `string` in the library is UTF-8 text, and the streams carry text
 only: the `std::io` readers and `std::fs::read` require valid UTF-8 and
-fail otherwise, while `std::net::sockRead` and `std::http` bodies decode
+fail otherwise, while `std::net::sock_read` and `std::http` bodies decode
 lossily, replacing each invalid sequence with U+FFFD. Arbitrary content
 crosses the **file** boundary through `std::fs`'s byte twins —
-`readBytes`, `writeBytes`, `appendBytes` — whose unit is `List<u8>` and
-which never decode. `stringBytes` reaches the bytes *of a string*, but the
+`read_bytes`, `write_bytes`, `append_bytes` — whose unit is `List<u8>` and
+which never decode. A string's `.bytes()` reaches its bytes, but the
 language has neither a bytes-to-string nor an integer-to-`u8` conversion:
 bytes become text only when a text reader accepts them as valid UTF-8, and
 byte values come from text, from files, or from literals. A byte-level
