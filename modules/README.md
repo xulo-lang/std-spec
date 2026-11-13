@@ -6,8 +6,8 @@ reaches it without declaring anything. The head `std` has exactly one level
 of children — the **modules** — and each module owns a set of members
 (constants, functions, or types) selected with `::`.
 
-Version 0.1 defines twelve modules. The set is closed: a path whose module is
-not one of the twelve does not resolve (`E0607`), and a member a module has not
+Version 0.1 defines thirteen modules. The set is closed: a path whose module is
+not one of the thirteen does not resolve (`E0607`), and a member a module has not
 listed below does not exist (`E0601`). New modules and new members enter
 through the workflow in [`../changes/`](../changes/README.md).
 
@@ -30,6 +30,7 @@ common. Each member's meaning is specified in its own module chapter.
 | `std::json` | parse, stringify, and validate the JSON value model | [`json.md`](json.md) |
 | `std::regex` | `RegExp`, `RegexMatch`, substitution, and splitting | [`regex.md`](regex.md) |
 | `std::fmt` | formatted text from a template and values: verbs, flags, width, and precision | [`fmt.md`](fmt.md) |
+| `std::hint` | identity, branch-prediction, and spin-wait hints | [`hint.md`](hint.md) |
 
 ## 2. Reaching the standard library
 
@@ -85,7 +86,7 @@ Notes:
 |----------|------|---------|
 | `use std;` | `E0607` | the root has no members of its own; bind a module, a member, or the face |
 | `use std::regex;` · `use std::regex as R;` | `E0607` | `std::regex` has no value namespace; import its names — `use std::regex::{RegExp, RegexError}` |
-| `use std::foo;` (unknown module) | `E0607` | the twelve modules are the whole tree |
+| `use std::foo;` (unknown module) | `E0607` | the thirteen modules are the whole tree |
 | `use std::math::floor::x;` (too deep) | `E0607` | members have no children |
 | `use std::math::nope;` | `E0601` | `module `std::math` does not export `nope`` |
 | `use std::io::print;` · `use std::io::{print};` | `E0601` | `print` is a prelude intrinsic name and cannot be rebound by a `use` |
@@ -139,7 +140,7 @@ nothing else.
 ## 3. Module faces
 
 The table lists each module's **exported** members; the **face** — the set
-of names its glob binds — coincides with the exports for eleven modules, and
+of names its glob binds — coincides with the exports for twelve modules, and
 `std::io` withholds two of its ten (see the note below).
 
 | Module | Constants | Functions | Types |
@@ -156,6 +157,7 @@ of names its glob binds — coincides with the exports for eleven modules, and
 | `std::json` | — | `parse` `stringify` `valid` | — |
 | `std::regex` | — | — | `RegExp` `RegexError` `RegexMatch` |
 | `std::fmt` | — | `format` | — |
+| `std::hint` | — | `black_box` `likely` `spin_loop` `unlikely` | — |
 
 **`std::io` exports ten functions and withholds two from its face.**
 `print` and `println` are members — `std::io::print(…)` is a checked, typed
@@ -202,6 +204,13 @@ function, against the signature this specification gives it:
   allows (`spec/expressions/literals.md`).
 - **Explicit type arguments** are never accepted: `std::json::parse<int>(…)`
   is `E0807`. No `std` member has a type parameter in version 0.1.
+- **Operand-typed result.** `std::hint::black_box(value)` has the static type
+  of its operand, and that derived type is the one the ordinary assignability
+  rules see. `std::hint::black_box(3)` is an `int`, so
+  `let x: string = std::hint::black_box(3)` is `E0201`; the result is not
+  `any`. `T` in [`hint.md`](hint.md)'s signature is a metavariable for the
+  operand's type, derived at each call; it is not a declared type parameter
+  and not a type argument a caller writes.
 - **Constants are values, not callables**: `std::math::PI(…)` is rejected
   (`E0204`, *not callable*).
 - **Unknown members** are `E0601`: ``module `std::json` has no member
@@ -317,7 +326,7 @@ meaning, not part of its type.
 
 | Portable (semantics fixed across hosts) | Host-dependent |
 |-------------------------------------------|----------------|
-| `std::math`, `std::time`, `std::json`, `std::regex`, `std::path`, `std::fmt` | `std::fs`, `std::os`, `std::net`, `std::http`, `std::process`, `std::io` |
+| `std::math`, `std::time`, `std::json`, `std::regex`, `std::path`, `std::fmt`, `std::hint` | `std::fs`, `std::os`, `std::net`, `std::http`, `std::process`, `std::io` |
 
 `std::path` is the rule's illustration: it is portable **string** semantics
 with POSIX rules regardless of the host, while `std::fs` follows the host's
@@ -344,8 +353,8 @@ discarding it is `E0218`.
 
 Where a chapter claims it, a conforming implementation produces the same
 result for the same inputs on every host: `std::json`'s output order, every
-`std::fmt` result, every `std::path` member, every `std::regex` match, and
-`std::time`'s calendar
+`std::fmt` result, every `std::hint` result, every `std::path` member, every
+`std::regex` match, and `std::time`'s calendar
 members (`format`, `parse`, `parts`, `from_parts`, `weekday`) are
 deterministic.
 Transcendental `std::math` functions (`sin`, `log`, `exp`, …) delegate to the

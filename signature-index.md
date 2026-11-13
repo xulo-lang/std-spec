@@ -1,6 +1,6 @@
 # Signature Index
 
-Every member of the twelve modules in one list, ordered case-insensitively by
+Every member of the thirteen modules in one list, ordered case-insensitively by
 member name. Constants show their type; a type's row shows it together with its
 callable members. The face of each module — the names its
 glob binds — is [`modules/README.md`](modules/README.md) § 3; where this
@@ -23,6 +23,7 @@ returns no value at all.
 | `atan` | `fn(x: float): float` | `std::math` |
 | `atan2` | `fn(y: float, x: float): float` | `std::math` |
 | `basename` | `fn(path: string): string` | `std::path` |
+| `black_box` | `fn(value: T): T` — `T` is the operand's static type; no type argument is written | `std::hint` |
 | `cbrt` | `fn(x: float): float` | `std::math` |
 | `ceil` | `fn(x: float): int` | `std::math` |
 | `chdir` | `fn(path: string): Result<unit, Error>` | `std::os` |
@@ -61,6 +62,7 @@ returns no value at all.
 | `is_absolute` | `fn(path: string): bool` | `std::path` |
 | `join` | `fn(a: string, b: string): string` | `std::path` |
 | `launch` | `fn(cmd: string, input: string? = null, timeout: u64? = null): Result<Child, Error>` | `std::process` |
+| `likely` | `fn(condition: bool): bool` | `std::hint` |
 | `listen` | `fn(addr: string): Result<Server, Error>` | `std::http` |
 | `log` | `fn(x: float): float` | `std::math` |
 | `log10` | `fn(x: float): float` | `std::math` |
@@ -122,6 +124,7 @@ returns no value at all.
 | `sock_shutdown` | `fn(handle: number): Result<unit, Error>` | `std::net` |
 | `sock_shutdown_write` | `fn(handle: number): Result<unit, Error>` | `std::net` |
 | `sock_write` | `fn(handle: number, data: string, timeout: u64? = null): Result<number, Error>` | `std::net` |
+| `spin_loop` | `fn(): unit` | `std::hint` |
 | `split` | `fn(path: string): { dir: string, base: string, ext: string }` | `std::path` |
 | `sqrt` | `fn(x: float): float` | `std::math` |
 | `stat` | `fn(path: string): Result<{ kind: string, size: number, modified: u64, mode: number }, Error>` | `std::fs` |
@@ -144,6 +147,7 @@ returns no value at all.
 | `to_fixed` | `fn(x: float, digits: int): string` | `std::math` |
 | `touch` | `fn(path: string): Result<unit, Error>` | `std::fs` |
 | `trunc` | `fn(x: float): int` | `std::math` |
+| `unlikely` | `fn(condition: bool): bool` | `std::hint` |
 | `unsetenv` | `fn(name: string): Result<unit, Error>` | `std::os` |
 | `user_name` | `fn(): Result<string, Error>` | `std::os` |
 | `valid` | `fn(text: string): bool` | `std::json` |
